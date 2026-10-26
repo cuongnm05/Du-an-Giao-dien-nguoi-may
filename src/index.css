@@ -6,15 +6,19 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
   
-  body {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
     font-family: var(--font-sans);
     background-color: #f8fafc; /* Nền trắng ngọc trai sáng dịu mắt */
     color: #1e293b;            /* Chữ tối sắc nét dễ đọc */
-    overflow-x: hidden;
   }
 
   #root {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -22,6 +26,7 @@
     border: none;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   /* Custom light emerald scrollbar */

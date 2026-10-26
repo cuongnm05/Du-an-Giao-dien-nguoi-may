@@ -63,7 +63,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
+    <div className="h-screen w-screen overflow-hidden bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
       
       {/* Top Header with Sidebar Toggle button */}
       <Header
@@ -84,10 +84,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Layout Area */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Main Layout Area - fills remaining viewport height and prevents whole-window scrolling */}
+      <div className="flex-1 flex overflow-hidden min-h-0 relative">
         
-        {/* Desktop Collapsible Sidebar */}
+        {/* Desktop Collapsible Sidebar - stays fixed on the left */}
         <Sidebar
           currentTab={currentTab}
           setCurrentTab={setCurrentTab}
@@ -99,8 +99,8 @@ export default function App() {
           onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
         />
 
-        {/* Content View Container */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-20 md:pb-8 bg-[#f8fafc] transition-all duration-300">
+        {/* Content View Container - the ONLY element that scrolls */}
+        <main className="flex-1 h-full overflow-y-auto min-h-0 p-4 sm:p-6 lg:p-8 space-y-6 pb-20 md:pb-8 bg-[#f8fafc] transition-all duration-300">
           {currentTab === 'dashboard' && (
             <DashboardView
               mode={mode}

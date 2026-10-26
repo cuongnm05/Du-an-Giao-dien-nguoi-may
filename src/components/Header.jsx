@@ -43,7 +43,7 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-6 py-3 transition-colors shadow-xs">
+    <header className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-6 py-3 transition-colors shadow-xs">
       <div className="flex items-center justify-between gap-3 sm:gap-4">
         
         {/* Left: Sidebar Toggle Button + Brand Logo */}

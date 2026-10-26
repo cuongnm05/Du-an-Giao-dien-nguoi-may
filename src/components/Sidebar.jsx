@@ -85,7 +85,7 @@ export default function Sidebar({
 
   return (
     <aside 
-      className={`bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 hidden md:flex transition-all duration-300 ease-in-out shadow-xs select-none ${
+      className={`bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 hidden md:flex transition-all duration-300 ease-in-out shadow-xs select-none h-full overflow-y-auto min-h-0 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
