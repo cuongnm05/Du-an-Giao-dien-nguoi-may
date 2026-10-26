@@ -15,7 +15,8 @@ import {
   Zap, 
   ArrowUpRight, 
   Coffee, 
-  RotateCcw 
+  RotateCcw,
+  LayoutGrid
 } from 'lucide-react';
 import AiVisionFeed from './AiVisionFeed';
 import { HOURLY_METRICS, SYSTEM_MODES } from '../data/mockData';
@@ -98,18 +99,18 @@ export default function DashboardView({
 
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
-            onClick={() => onNavigateTab('cameras')}
+            onClick={() => onNavigateTab('multicam')}
             className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all"
           >
-            <Camera className="w-4 h-4" />
-            <span>Thiết Lập Máy Camera</span>
+            <LayoutGrid className="w-4 h-4" />
+            <span>Giám Sát Đa Camera</span>
           </button>
           <button
-            onClick={() => onNavigateTab('reports')}
+            onClick={() => onNavigateTab('cameras')}
             className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition-all"
           >
-            <span>Xuất Báo Cáo</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-slate-500" />
+            <Camera className="w-4 h-4 text-emerald-600" />
+            <span>Cài Đặt Camera</span>
           </button>
         </div>
       </div>
@@ -235,6 +236,15 @@ export default function DashboardView({
                   {c.id}
                 </button>
               ))}
+
+              <button
+                onClick={() => onNavigateTab('multicam')}
+                className="ml-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1 transition-colors whitespace-nowrap"
+                title="Mở ma trận quan sát nhiều camera đồng thời"
+              >
+                <LayoutGrid className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Xem Ma Trận {cameras.length} Cam</span>
+              </button>
             </div>
           </div>
 

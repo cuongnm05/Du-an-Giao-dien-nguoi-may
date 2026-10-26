@@ -1,6 +1,7 @@
 import React from 'react';
 import { 
   LayoutDashboard, 
+  LayoutGrid,
   Users, 
   Camera, 
   BarChart3, 
@@ -38,6 +39,14 @@ export default function Sidebar({
       fullName: 'Tổng Quan & Giám Sát Live',
       icon: LayoutDashboard,
       badge: 'Live',
+      badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+    },
+    {
+      id: 'multicam',
+      label: 'Đa Camera',
+      fullName: 'Giám Sát Đa Camera (Video Wall)',
+      icon: LayoutGrid,
+      badge: `${cameraCount} Cam`,
       badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
     },
     {

@@ -6,6 +6,7 @@ import MembersView from './components/MembersView';
 import CameraSetupView from './components/CameraSetupView';
 import ReportsView from './components/ReportsView';
 import AlertSettingsView from './components/AlertSettingsView';
+import MultiCameraView from './components/MultiCameraView';
 import PostureModal from './components/PostureModal';
 
 import { 
@@ -17,6 +18,7 @@ import {
 
 import { 
   LayoutDashboard, 
+  LayoutGrid,
   Users, 
   Camera, 
   BarChart3, 
@@ -110,6 +112,15 @@ export default function App() {
             />
           )}
 
+          {currentTab === 'multicam' && (
+            <MultiCameraView
+              cameras={cameras}
+              members={members}
+              onSelectMember={(mem) => setSelectedMember(mem)}
+              onSendBuzzer={handleSendBuzzer}
+            />
+          )}
+
           {currentTab === 'members' && (
             <MembersView
               mode={mode}
@@ -150,6 +161,16 @@ export default function App() {
         >
           <LayoutDashboard className="w-4 h-4" />
           <span>Tổng quan</span>
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('multicam')}
+          className={`flex flex-col items-center gap-0.5 p-1 rounded-lg ${
+            currentTab === 'multicam' ? 'text-emerald-600 font-bold' : 'text-slate-500'
+          }`}
+        >
+          <LayoutGrid className="w-4 h-4" />
+          <span>Đa Cam</span>
         </button>
 
         <button
