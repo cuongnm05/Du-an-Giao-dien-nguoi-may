@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import DashboardView from './components/DashboardView';
@@ -32,6 +32,19 @@ export default function App() {
   const [alerts, setAlerts] = useState(RECENT_ALERTS);
   const [selectedMember, setSelectedMember] = useState(null);
   const [buzzerToast, setBuzzerToast] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setIsSidebarCollapsed(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleAddMember = (newMem) => {
     setMembers(prev => [newMem, ...prev]);
@@ -50,13 +63,15 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
       
-      {/* Top Header */}
+      {/* Top Header with Sidebar Toggle button */}
       <Header
         mode={mode}
         setMode={setMode}
         alerts={alerts}
         onSelectAlert={handleSelectAlert}
         onOpenQuickCam={() => setCurrentTab('cameras')}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={() => setIsSidebarCollapsed(prev => !prev)}
       />
 
       {/* Buzzer Toast Banner */}
@@ -70,7 +85,7 @@ export default function App() {
       {/* Main Layout Area */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* Desktop Sidebar */}
+        {/* Desktop Collapsible Sidebar */}
         <Sidebar
           currentTab={currentTab}
           setCurrentTab={setCurrentTab}
@@ -78,10 +93,12 @@ export default function App() {
           memberCount={members.length}
           cameraCount={cameras.length}
           alertCount={alerts.filter(a => !a.resolved).length}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
         />
 
         {/* Content View Container */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-20 md:pb-8 bg-[#f8fafc]">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-20 md:pb-8 bg-[#f8fafc] transition-all duration-300">
           {currentTab === 'dashboard' && (
             <DashboardView
               mode={mode}
