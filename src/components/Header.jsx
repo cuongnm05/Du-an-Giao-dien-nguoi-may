@@ -10,9 +10,7 @@ import {
   Sparkles, 
   CheckCircle2, 
   AlertTriangle, 
-  X,
-  PanelLeft,
-  Menu
+  X
 } from 'lucide-react';
 import { SYSTEM_MODES } from '../data/mockData';
 
@@ -21,9 +19,7 @@ export default function Header({
   setMode, 
   alerts, 
   onSelectAlert,
-  onOpenQuickCam,
-  isSidebarCollapsed,
-  onToggleSidebar
+  onOpenQuickCam
 }) {
   const [time, setTime] = useState(new Date().toLocaleTimeString('vi-VN'));
   const [showNotifications, setShowNotifications] = useState(false);
@@ -46,38 +42,26 @@ export default function Header({
     <header className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-6 py-3 transition-colors shadow-xs">
       <div className="flex items-center justify-between gap-3 sm:gap-4">
         
-        {/* Left: Sidebar Toggle Button + Brand Logo */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Toggle Sidebar Button */}
-          <button
-            onClick={onToggleSidebar}
-            className="p-2 rounded-xl text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-colors"
-            title={isSidebarCollapsed ? "Mở rộng thanh menu (Ctrl+B)" : "Thu gọn thanh menu (Ctrl+B)"}
-          >
-            <PanelLeft className="w-5 h-5 text-emerald-600" />
-          </button>
-
-          {/* Brand Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 p-0.5 shadow-md shadow-emerald-600/20">
-              <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-                <Camera className="w-5 h-5 text-emerald-600" />
-              </div>
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
+        {/* Left: Brand Logo */}
+        <div className="flex items-center gap-2.5">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 p-0.5 shadow-md shadow-emerald-600/20">
+            <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+              <Camera className="w-5 h-5 text-emerald-600" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
-                  AI PoseVision <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider hidden sm:inline">Pro v2.4</span>
-                </h1>
-              </div>
-              <p className="text-[11px] text-slate-500 hidden lg:block">
-                Hệ Thống Đánh Giá Năng Suất & Tư Thế Ngồi Thông Minh Qua Camera AI
-              </p>
+            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
+                AI PoseVision <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider hidden sm:inline">Pro v2.4</span>
+              </h1>
             </div>
+            <p className="text-[11px] text-slate-500 hidden lg:block">
+              Hệ Thống Đánh Giá Năng Suất & Tư Thế Ngồi Thông Minh Qua Camera AI
+            </p>
           </div>
         </div>
 

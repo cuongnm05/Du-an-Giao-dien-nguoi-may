@@ -322,10 +322,13 @@ export default function CameraSetupView({ cameras, members, onUpdateCameras }) {
             ) : (
               <div>
                 <AiVisionFeed 
+                  camId={activeCam.id}
                   camName={activeCam.name}
                   memberName={activeCam.assignedTo || 'Nhân sự'}
+                  webcamUrl={activeCam.webcamUrl}
                   initialPosture="good"
                   showControls={true}
+                  showHeader={false}
                   height="h-96"
                 />
               </div>

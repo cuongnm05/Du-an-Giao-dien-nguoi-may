@@ -78,10 +78,13 @@ export default function PostureModal({ member, onClose, onSendBuzzer }) {
             </div>
 
             <AiVisionFeed 
-              camName={`Camera ${member.workstation}`}
+              camId={member.camId || 'CAM-01'}
+              camName={`Webcam ${member.workstation}`}
               memberName={member.name}
+              webcamUrl={member.webcamUrl}
               initialPosture={member.currentPosture}
               showControls={false}
+              showHeader={false}
               height="h-56"
             />
 

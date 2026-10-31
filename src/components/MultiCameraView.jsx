@@ -338,10 +338,13 @@ export default function MultiCameraView({
             </div>
 
             <AiVisionFeed 
+              camId={focusedFeed.id}
               camName={focusedFeed.name}
               memberName={focusedFeed.member.name}
+              webcamUrl={focusedFeed.webcamUrl}
               initialPosture={focusedFeed.member.currentPosture}
               showControls={true}
+              showHeader={false}
               height="h-[440px]"
             />
           </div>
@@ -378,10 +381,13 @@ export default function MultiCameraView({
                 </div>
                 <div className="rounded-xl overflow-hidden pointer-events-none">
                   <AiVisionFeed 
+                    camId={feed.id}
                     camName={feed.name}
                     memberName={feed.member.name}
+                    webcamUrl={feed.webcamUrl}
                     initialPosture={feed.member.currentPosture}
                     showControls={false}
+                    showHeader={false}
                     height="h-28"
                   />
                 </div>
@@ -449,19 +455,15 @@ export default function MultiCameraView({
                 {/* Video / AI Skeleton Canvas Stream */}
                 <div className="relative">
                   <AiVisionFeed 
+                    camId={feed.id}
                     camName={feed.name}
                     memberName={feed.member.name}
+                    webcamUrl={feed.webcamUrl}
                     initialPosture={feed.member.currentPosture}
                     showControls={false}
+                    showHeader={false}
                     height="h-56"
                   />
-
-                  {/* Metadata Overlay Badge */}
-                  <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[10px] font-mono text-white flex items-center gap-1.5 pointer-events-none">
-                    <span>{feed.location}</span>
-                    <span>•</span>
-                    <span className="text-emerald-400">{feed.fps} FPS</span>
-                  </div>
                 </div>
 
                 {/* Footer Controls & Quick Actions */}
@@ -531,10 +533,13 @@ export default function MultiCameraView({
             </div>
 
             <AiVisionFeed 
+              camId={fullscreenCam.id}
               camName={fullscreenCam.name}
               memberName={fullscreenCam.member.name}
+              webcamUrl={fullscreenCam.webcamUrl}
               initialPosture={fullscreenCam.member.currentPosture}
               showControls={true}
+              showHeader={false}
               height="h-[480px]"
             />
           </div>

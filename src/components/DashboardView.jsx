@@ -250,10 +250,13 @@ export default function DashboardView({
 
           {/* Interactive AI Feed Component */}
           <AiVisionFeed 
+            camId={selectedCam.id}
             camName={selectedCam.name}
             memberName={assignedMember.name}
+            webcamUrl={selectedCam.webcamUrl || assignedMember.webcamUrl}
             initialPosture={assignedMember.currentPosture}
             showControls={true}
+            showHeader={false}
             height="h-80"
             onAlertTrigger={triggerLiveAlert}
           />

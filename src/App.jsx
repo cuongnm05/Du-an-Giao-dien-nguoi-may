@@ -65,15 +65,13 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
       
-      {/* Top Header with Sidebar Toggle button */}
+      {/* Top Header */}
       <Header
         mode={mode}
         setMode={setMode}
         alerts={alerts}
         onSelectAlert={handleSelectAlert}
         onOpenQuickCam={() => setCurrentTab('cameras')}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={() => setIsSidebarCollapsed(prev => !prev)}
       />
 
       {/* Buzzer Toast Banner */}
