@@ -224,6 +224,7 @@ export default function App() {
                   cameras={cameras}
                   members={members}
                   onUpdateCameras={setCameras}
+                  mode="enterprise"
                 />
               )}
             </>
