@@ -39,10 +39,16 @@ import {
   Filter,
   Keyboard,
   MousePointer,
-  Monitor
+  Monitor,
+  Maximize2,
+  Award,
+  Medal,
+  Star,
+  Target
 } from 'lucide-react';
 import AiVisionFeed from './AiVisionFeed';
 import WorkstationTriMonitor from './WorkstationTriMonitor';
+import WorkstationInspectorModal from './WorkstationInspectorModal';
 import { 
   INITIAL_PERSONAL_TIMETABLE, 
   MOCK_VIDEO_RECORDINGS, 
@@ -59,6 +65,8 @@ export default function PersonalView({
 }) {
   const [timetable, setTimetable] = useState(INITIAL_PERSONAL_TIMETABLE);
   const [activeTask, setActiveTask] = useState(timetable[1]);
+  const [inspectorPersonalCam, setInspectorPersonalCam] = useState(null);
+  const [isPersonalPatrolling, setIsPersonalPatrolling] = useState(false);
   
   // Real-time Anti-Procrastination Assistant State
   const [isAiAssistantActive, setIsAiAssistantActive] = useState(true);
@@ -270,8 +278,24 @@ export default function PersonalView({
               </p>
             </div>
 
-            {/* Nút bật/tắt thông báo tập trung */}
+            {/* Nút Tuần Tra Cá Nhân, bật/tắt thông báo & thời khóa biểu */}
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setIsPersonalPatrolling(!isPersonalPatrolling);
+                  showToast(!isPersonalPatrolling ? 'Đã bật chế độ Tuần Tra Giám Sát Cá Nhân Tự Động (AI Pose & Screen Real-time)!' : 'Đã dừng tuần tra cá nhân.');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                  isPersonalPatrolling 
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-xs animate-pulse' 
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+                title="Tự động tuần tra phân tích góc ngồi và tiến trình làm việc"
+              >
+                {isPersonalPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
+                <span>{isPersonalPatrolling ? 'Dừng Tuần Tra' : 'Tuần Tra Cá Nhân'}</span>
+              </button>
+
               <button
                 onClick={() => {
                   setIsNotificationsEnabled(!isNotificationsEnabled);
@@ -284,7 +308,7 @@ export default function PersonalView({
                 }`}
               >
                 {isNotificationsEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
-                <span>{isNotificationsEnabled ? 'Nhắc Nhở: Bật' : 'Không Làm Phiền: Bật'}</span>
+                <span>{isNotificationsEnabled ? 'Nhắc Nhở: Bật' : 'Không Làm Phiền'}</span>
               </button>
 
               <button
@@ -401,12 +425,15 @@ export default function PersonalView({
                   </span>
                 </div>
 
-                {/* Viewport Camera Live sắc nét */}
-                <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 group shadow-inner">
+                {/* Viewport Camera Live sắc nét - Bấm để phóng to xem chi tiết */}
+                <div 
+                  onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                  className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 group shadow-inner cursor-pointer"
+                >
                   <img
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
                     alt="Personal Live Camera"
-                    className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95]"
+                    className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95] group-hover:scale-105 transition-transform duration-300"
                   />
 
                   {/* OSD Header */}
@@ -424,6 +451,14 @@ export default function PersonalView({
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-slate-300">
                       Khoảng cách: 65cm
+                    </span>
+                  </div>
+
+                  {/* Hover overlay button */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="px-3.5 py-1.5 rounded-xl bg-white/90 text-slate-900 font-bold text-xs shadow-md flex items-center gap-1.5">
+                      <Maximize2 className="w-4 h-4 text-emerald-600" />
+                      <span>Xem Chi Tiết Máy Phóng To</span>
                     </span>
                   </div>
                 </div>
@@ -454,13 +489,21 @@ export default function PersonalView({
               </div>
 
               {/* Nút hành động nhanh */}
-              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                <button
+                  onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-xs transition-colors"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>Xem Chi Tiết Bàn Máy</span>
+                </button>
+
                 <button
                   onClick={handleSimulateDistraction}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-xl text-xs transition-colors border border-amber-200"
                 >
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Mô Phỏng Cảnh Báo Sao Nhãng</span>
+                  <span>Mô Phỏng Cảnh Báo</span>
                 </button>
 
                 <button
@@ -468,7 +511,7 @@ export default function PersonalView({
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors"
                 >
                   <Camera className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Cài Đặt Camera Cá Nhân</span>
+                  <span>Cài Đặt Cam</span>
                 </button>
               </div>
             </div>
@@ -1463,56 +1506,304 @@ export default function PersonalView({
             </div>
           </div>
 
-          {/* Biểu đồ so sánh 7 ngày và Lời khuyên công thái học */}
+          {/* Biểu đồ so sánh và phân tích chuyên sâu (h-72 / h-80, có Y-axis, dual bars nổi bật) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start text-xs">
-            <div className="lg:col-span-8 p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
-              <div className="font-bold text-slate-900 flex items-center justify-between pb-2 border-b border-slate-100">
-                <span>Diễn Biến Điểm Số Tư Thế & Giờ Tập Trung 7 Ngày Qua</span>
-                <span className="font-mono text-emerald-600 font-bold">TB: 92.4 Điểm</span>
+            <div className="lg:col-span-8 p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-100 gap-2">
+                <div>
+                  <span className="font-bold text-slate-900 text-sm block">Diễn Biến Điểm Số Tư Thế & Giờ Tập Trung</span>
+                  <span className="text-[11px] text-slate-400">Đo lường thời gian thực qua AI PoseVision</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                    <span className="w-2.5 h-2.5 rounded bg-emerald-500"></span>
+                    <span>Điểm Tư Thế AI</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                    <span className="w-2.5 h-2.5 rounded bg-teal-400"></span>
+                    <span>Giờ Tập Trung</span>
+                  </div>
+                  <span className="font-mono text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 ml-1">
+                    TB: 94.2 Điểm
+                  </span>
+                </div>
               </div>
 
-              {/* 7-Day Bar Chart */}
-              <div className="grid grid-cols-7 gap-2 h-36 items-end pt-2 px-1">
+              {/* Taller Bar Chart (h-72 sm:h-80) with Y-axis grid lines */}
+              <div className="relative h-72 sm:h-80 w-full pt-4 pb-6 pl-10 pr-2">
+                {/* Đường lưới Y-axis */}
+                <div className="absolute inset-0 pl-10 pb-6 flex flex-col justify-between pointer-events-none text-[10px] font-mono text-slate-400">
+                  <div className="border-b border-slate-100 flex items-center justify-between">
+                    <span className="-ml-9">100%</span>
+                  </div>
+                  <div className="border-b border-slate-100 flex items-center justify-between">
+                    <span className="-ml-9">75%</span>
+                  </div>
+                  <div className="border-b border-slate-100 flex items-center justify-between">
+                    <span className="-ml-9">50%</span>
+                  </div>
+                  <div className="border-b border-slate-100 flex items-center justify-between">
+                    <span className="-ml-9">25%</span>
+                  </div>
+                  <div className="border-b border-slate-200 flex items-center justify-between">
+                    <span className="-ml-9">0%</span>
+                  </div>
+                </div>
+
+                {/* Staggered Dual Bar Chart Columns */}
+                <div className="relative h-full w-full grid grid-cols-7 gap-2 sm:gap-4 items-end">
+                  {[
+                    { day: 'Thứ 2', score: 88, hoursNum: 7.8, hours: '7.8h' },
+                    { day: 'Thứ 3', score: 92, hoursNum: 8.2, hours: '8.2h' },
+                    { day: 'Thứ 4', score: 86, hoursNum: 8.0, hours: '8.0h' },
+                    { day: 'Thứ 5', score: 95, hoursNum: 8.5, hours: '8.5h' },
+                    { day: 'Thứ 6', score: 91, hoursNum: 8.1, hours: '8.1h' },
+                    { day: 'Thứ 7', score: 96, hoursNum: 6.5, hours: '6.5h' },
+                    { day: 'Chủ Nhật', score: 98, hoursNum: 5.2, hours: '5.2h' }
+                  ].map((item, i) => {
+                    const ergoHeight = item.score;
+                    const hoursHeight = Math.round((item.hoursNum / 9) * 88);
+
+                    return (
+                      <div key={i} className="flex flex-col items-center h-full justify-end group relative">
+                        {/* Tooltip on hover */}
+                        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                          {item.day}: <b>{item.score}đ</b> • {item.hours}
+                        </div>
+
+                        {/* Dual Bars Container */}
+                        <div className="w-full flex items-end justify-center gap-1.5 h-full pb-1">
+                          {/* Bar 1: Điểm tư thế (Emerald) */}
+                          <div
+                            style={{ height: `${ergoHeight}%` }}
+                            className="w-1/2 max-w-[20px] bg-gradient-to-t from-emerald-600 via-emerald-500 to-teal-400 rounded-t-lg transition-all group-hover:brightness-110 shadow-2xs"
+                          ></div>
+
+                          {/* Bar 2: Giờ làm việc (Teal) */}
+                          <div
+                            style={{ height: `${hoursHeight}%` }}
+                            className="w-1/2 max-w-[20px] bg-gradient-to-t from-teal-500 to-cyan-300 rounded-t-lg transition-all group-hover:brightness-110 shadow-2xs"
+                          ></div>
+                        </div>
+
+                        <div className="text-[10px] font-bold text-slate-700 mt-1">{item.day}</div>
+                        <div className="text-[9px] text-slate-400 font-mono">{item.hours}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Cột phải (4 cols): Đánh Giá Cột Sống AI & Góc Cổ Theo Giờ */}
+            <div className="lg:col-span-4 space-y-4">
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+                <div className="font-bold text-slate-900 pb-2 border-b border-slate-100 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Đánh Giá Cột Sống AI</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">
+                    AN TOÀN
+                  </span>
+                </div>
+                <div className="space-y-2 text-[11px] leading-relaxed text-slate-600">
+                  <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Cột sống thắt lưng được giữ thẳng <b>98%</b> thời gian làm việc.</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-teal-50/60 border border-teal-100 flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+                    <span>Góc nhìn cổ duy trì trong khoảng <b>14-18°</b> (rất an toàn cho đốt sống cổ C1-C7).</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-purple-50/60 border border-purple-100 flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                    <span className="text-purple-900 font-medium">Khuyến nghị AI: Tiếp tục duy trì thói quen nghỉ ngơi 5 phút sau mỗi 50 phút tập trung!</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Đường cong độ nghiêng cổ theo từng khung giờ */}
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-2.5">
+                <div className="font-bold text-slate-900 text-xs flex items-center justify-between">
+                  <span>Góc Nghiêng Cổ Hôm Nay</span>
+                  <span className="text-emerald-600 font-mono font-bold text-[11px]">TB: 15.2°</span>
+                </div>
+                <div className="space-y-1.5 pt-1">
+                  {[
+                    { time: '08:00 - 10:00', angle: '12°', status: 'Rất tốt', color: 'bg-emerald-500' },
+                    { time: '10:00 - 12:00', angle: '16°', status: 'Chuẩn', color: 'bg-emerald-500' },
+                    { time: '13:30 - 15:30', angle: '18°', status: 'Chuẩn', color: 'bg-teal-500' },
+                    { time: '15:30 - 17:30', angle: '24°', status: 'Hơi cúi', color: 'bg-amber-500' }
+                  ].map((row, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-slate-50">
+                      <span className="text-slate-600 font-mono">{row.time}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-slate-900">{row.angle}</span>
+                        <span className={`w-2 h-2 rounded-full ${row.color}`}></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================== CÁC MÔ-ĐUN LẤP ĐẦY KHOẢNG TRẮNG CÂN ĐỐI CHUẨN HCI ===================== */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch text-xs">
+            
+            {/* MÔ-ĐUN 1 (7 cols): HEATMAP TẬP TRUNG & TƯ THẾ 7 NGÀY X 5 CA LÀM VIỆC */}
+            <div className="lg:col-span-7 p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-600" />
+                  <span className="font-bold text-slate-900 text-sm">Bản Đồ Nhiệt Độ Tập Trung & Tư Thế Tuần Này (Heatmap)</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
+                  <span>Thấp</span>
+                  <span className="w-2.5 h-2.5 rounded bg-emerald-100"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-emerald-300"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-emerald-500"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-emerald-700"></span>
+                  <span>Cao</span>
+                </div>
+              </div>
+
+              {/* Heatmap Grid 7 Days x 5 Shifts */}
+              <div className="space-y-2 pt-1">
                 {[
-                  { day: 'T2', score: 88, hours: '7.8h' },
-                  { day: 'T3', score: 91, hours: '8.2h' },
-                  { day: 'T4', score: 86, hours: '8.0h' },
-                  { day: 'T5', score: 94, hours: '8.5h' },
-                  { day: 'T6', score: 92, hours: '8.1h' },
-                  { day: 'T7', score: 96, hours: '6.5h' },
-                  { day: 'CN', score: 98, hours: '5.2h' }
-                ].map((item, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-                    <span className="text-[10px] font-mono text-emerald-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      {item.score}đ
-                    </span>
-                    <div 
-                      style={{ height: `${(item.score / 100) * 100}%` }} 
-                      className="w-full bg-gradient-to-t from-emerald-600 to-teal-400 rounded-lg group-hover:from-emerald-500 group-hover:to-teal-300 transition-all shadow-xs"
-                    />
-                    <div className="text-[11px] font-bold text-slate-700">{item.day}</div>
-                    <div className="text-[9px] text-slate-400 font-mono">{item.hours}</div>
+                  { shift: 'Sáng (08:00 - 10:00)', values: [4, 4, 3, 4, 4, 3, 2] },
+                  { shift: 'Trưa (10:00 - 12:00)', values: [4, 3, 4, 4, 3, 2, 0] },
+                  { shift: 'Đầu Chiều (13:30 - 15:30)', values: [3, 4, 4, 4, 3, 3, 1] },
+                  { shift: 'Cuối Chiều (15:30 - 17:30)', values: [4, 3, 3, 4, 4, 2, 0] },
+                  { shift: 'Tối (20:00 - 22:00)', values: [2, 3, 2, 3, 1, 0, 3] }
+                ].map((row, rIdx) => (
+                  <div key={rIdx} className="flex items-center gap-2">
+                    <span className="w-36 text-[10px] text-slate-500 font-mono truncate">{row.shift}</span>
+                    <div className="flex-1 grid grid-cols-7 gap-1.5">
+                      {row.values.map((v, cIdx) => {
+                        const bgClass = 
+                          v === 4 ? 'bg-emerald-600 text-white' :
+                          v === 3 ? 'bg-emerald-400 text-emerald-950' :
+                          v === 2 ? 'bg-emerald-200 text-emerald-900' :
+                          v === 1 ? 'bg-emerald-100 text-emerald-800' :
+                          'bg-slate-100 text-slate-400';
+
+                        const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+
+                        return (
+                          <div
+                            key={cIdx}
+                            className={`h-7 rounded-lg flex items-center justify-center font-mono text-[9px] font-bold transition-all hover:scale-105 cursor-pointer shadow-2xs ${bgClass}`}
+                            title={`${dayNames[cIdx]} - ${row.shift}: Mức độ tuân thủ tư thế ${v * 25}%`}
+                          >
+                            {v > 0 ? `${v * 25}%` : '-'}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
+
+              {/* Ngày trong tuần labels */}
+              <div className="flex items-center gap-2 pt-1 border-t border-slate-100 text-[10px] text-slate-400 font-bold">
+                <span className="w-36"></span>
+                <div className="flex-1 grid grid-cols-7 gap-1.5 text-center">
+                  <span>T2</span>
+                  <span>T3</span>
+                  <span>T4</span>
+                  <span>T5</span>
+                  <span>T6</span>
+                  <span>T7</span>
+                  <span>CN</span>
+                </div>
+              </div>
             </div>
 
-            <div className="lg:col-span-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
-              <div className="font-bold text-slate-900 pb-2 border-b border-slate-100">
-                Đánh Giá Cột Sống AI
+            {/* MÔ-ĐUN 2 (5 cols): MỤC TIÊU CÔNG THÁI HỌC TUẦN & HUY HIỆU */}
+            <div className="lg:col-span-5 space-y-4">
+              
+              {/* Mục tiêu tuần */}
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-emerald-600" />
+                    <span className="font-bold text-slate-900 text-sm">Mục Tiêu Công Thái Học Tuần Này</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">3/4 Đạt</span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { label: 'Tỷ lệ ngồi chuẩn >= 90%', progress: 94, status: 'Hoàn thành' },
+                    { label: 'Đứng dậy giãn cơ sau mỗi 50 phút', progress: 80, status: '8/10 lần' },
+                    { label: 'Cự ly mắt - màn hình >= 55cm', progress: 100, status: '100% Đạt' },
+                    { label: 'Giảm thời gian cúi đầu < 15 phút/ngày', progress: 92, status: 'Xuất sắc' }
+                  ].map((goal, gIdx) => (
+                    <div key={gIdx} className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-medium text-slate-700">{goal.label}</span>
+                        <span className="font-mono text-emerald-700 font-bold">{goal.status}</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${goal.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-2 text-[11px] leading-relaxed text-slate-600">
-                <p>
-                  ✓ Cột sống thắt lưng được giữ thẳng 98% thời gian làm việc.
-                </p>
-                <p>
-                  ✓ Góc nhìn cổ duy trì trong khoảng 15-22° (rất an toàn cho đốt sống cổ C1-C7).
-                </p>
-                <p className="text-emerald-700 font-semibold">
-                  Khuyến nghị: Tiếp tục duy trì thói quen nghỉ ngơi 5 phút sau mỗi 50 phút tập trung!
-                </p>
+
+              {/* Bộ sưu tập huy hiệu cá nhân */}
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-500" />
+                    <span className="font-bold text-slate-900 text-sm">Bộ Sưu Tập Huy Hiệu Cá Nhân</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono">4 Huy Hiệu</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-amber-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-amber-900">Chiến Binh Cột Sống</div>
+                      <div className="text-[9px] text-amber-700">Streak 45 ngày chuẩn</div>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-emerald-900">Bậc Thầy Ergonomics</div>
+                      <div className="text-[9px] text-emerald-700">Điểm TB tuần 94đ</div>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-purple-50/70 border border-purple-200 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-purple-900">Deep Work Chuyên Gia</div>
+                      <div className="text-[9px] text-purple-700">Hoàn thành 12 Pomodoro</div>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-teal-50/70 border border-teal-200 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-teal-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-teal-900">Dẻo Dai Cột Sống</div>
+                      <div className="text-[9px] text-teal-700">Đủ 100% bài giãn cơ</div>
+                    </div>
+                  </div>
+                </div>
               </div>
+
             </div>
+
           </div>
         </div>
       )}
@@ -1637,6 +1928,35 @@ export default function PersonalView({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Enlarged Workstation Inspector Modal Cá Nhân */}
+      {inspectorPersonalCam && (
+        <WorkstationInspectorModal
+          cam={{
+            ...personalWorkstation,
+            id: 'PC-PERSONAL-01',
+            name: 'Bàn Làm Việc Cá Nhân',
+            assignedTo: 'Nguyễn Văn Cường',
+            location: 'Home Office - Bàn Làm Việc',
+            webcamUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+            ip: '192.168.1.55',
+            activeProcess: 'code.exe - VS Code Frontend Core',
+            currentPosture: 'good',
+            inputTelemetry: personalWorkstation.inputTelemetry
+          }}
+          member={{
+            name: 'Nguyễn Văn Cường',
+            role: 'Kỹ sư phần mềm (Cá nhân)',
+            currentPosture: 'good',
+            ergonomicsScore: 94,
+            rank: 1
+          }}
+          onClose={() => setInspectorPersonalCam(null)}
+          onSendBuzzer={() => {
+            showToast('🔔 Đã kích hoạt chuông âm thanh nhắc nhở công thái học trên máy tính của bạn!');
+          }}
+        />
       )}
 
     </div>

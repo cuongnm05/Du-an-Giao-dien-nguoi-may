@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import AiVisionFeed from './AiVisionFeed';
 import WorkstationTriMonitor from './WorkstationTriMonitor';
+import WorkstationInspectorModal from './WorkstationInspectorModal';
 
 export default function MultiCameraView({ 
   cameras = [], 
@@ -34,13 +35,14 @@ export default function MultiCameraView({
   onSelectMember, 
   onSendBuzzer 
 }) {
-  const [layoutMode, setLayoutMode] = useState('grid12'); // 'grid6' | 'grid12' | 'grid32' | 'focus'
+  const [layoutMode, setLayoutMode] = useState('grid12'); // 'grid6' | 'grid12' | 'gridAll' | 'focus'
   const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'warning' | 'good' | 'online'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('all');
   const [focusedCamId, setFocusedCamId] = useState(cameras[0]?.id || 'PC-01');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = layoutMode === 'grid6' ? 6 : layoutMode === 'grid12' ? 12 : 32;
+  const [inspectorCam, setInspectorCam] = useState(null);
+  const pageSize = layoutMode === 'grid6' ? 6 : layoutMode === 'grid12' ? 12 : 999;
 
   // Real-time clock for all cameras
   const [liveClock, setLiveClock] = useState(() => new Date().toLocaleTimeString('vi-VN'));
@@ -145,7 +147,7 @@ export default function MultiCameraView({
               filterStatus === 'all' ? 'bg-emerald-600 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            Tất cả ({cameraFeeds.length})
+            Tất cả
           </button>
 
           <button
@@ -183,11 +185,11 @@ export default function MultiCameraView({
               12 Cam
             </button>
             <button
-              onClick={() => { setLayoutMode('grid32'); setCurrentPage(1); }}
-              className={`px-2.5 py-1 rounded-lg font-semibold ${layoutMode === 'grid32' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'}`}
-              title="Xem tất cả 32 Cam"
+              onClick={() => { setLayoutMode('gridAll'); setCurrentPage(1); }}
+              className={`px-2.5 py-1 rounded-lg font-semibold ${layoutMode === 'gridAll' || layoutMode === 'grid32' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'}`}
+              title="Xem tất cả Camera không phân trang"
             >
-              32 Cam (Toàn bộ)
+              Xem Tất Cả Cam
             </button>
             <button
               onClick={() => setLayoutMode('focus')}
@@ -258,10 +260,10 @@ export default function MultiCameraView({
           </div>
         </div>
       ) : (
-        /* Grid Layout: 6, 12, hoặc 32 Cam hiển thị hình ảnh chuẩn xác, không bị lỗi */
+        /* Grid Layout: 6, 12, hoặc Toàn bộ Cam hiển thị hình ảnh chuẩn xác */
         <div className="space-y-4">
           <div className={`grid gap-3 ${
-            layoutMode === 'grid32'
+            layoutMode === 'gridAll' || layoutMode === 'grid32'
               ? 'grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'
               : layoutMode === 'grid12'
               ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
@@ -275,14 +277,14 @@ export default function MultiCameraView({
                 <div
                   key={cam.id}
                   onClick={() => {
-                    setFocusedCamId(cam.id);
+                    setInspectorCam(cam);
                   }}
                   className={`bg-slate-950 border rounded-2xl overflow-hidden shadow-2xs hover:shadow-lg transition-all flex flex-col justify-between group cursor-pointer ${
                     isWarning ? 'border-rose-400 ring-1 ring-rose-400/50' : 'border-slate-800'
                   }`}
                 >
                   {/* Viewport Camera Feed với hình ảnh thật & OSD Vị trí + Thời gian thực */}
-                  <div className={`relative w-full ${layoutMode === 'grid32' ? 'h-28' : 'h-44 sm:h-48'} bg-slate-900 overflow-hidden`}>
+                  <div className={`relative w-full ${layoutMode === 'gridAll' || layoutMode === 'grid32' ? 'h-28' : 'h-44 sm:h-48'} bg-slate-900 overflow-hidden`}>
                     
                     {posture === 'away' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 font-mono text-[10px] gap-1 bg-slate-950">
@@ -375,7 +377,7 @@ export default function MultiCameraView({
           </div>
 
           {/* Phân trang khi ở chế độ 6 hoặc 12 cam */}
-          {layoutMode !== 'grid32' && totalPages > 1 && (
+          {layoutMode !== 'grid32' && layoutMode !== 'gridAll' && totalPages > 1 && (
             <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-2xl text-xs">
               <span className="text-slate-500">
                 Trang <strong>{currentPage}</strong> / <strong>{totalPages}</strong> ({filteredFeeds.length} Máy theo dõi)
@@ -411,6 +413,16 @@ export default function MultiCameraView({
             </div>
           )}
         </div>
+      )}
+
+      {/* Enlarged Workstation Inspector Modal */}
+      {inspectorCam && (
+        <WorkstationInspectorModal
+          cam={inspectorCam}
+          member={inspectorCam.member}
+          onClose={() => setInspectorCam(null)}
+          onSendBuzzer={onSendBuzzer}
+        />
       )}
 
     </div>

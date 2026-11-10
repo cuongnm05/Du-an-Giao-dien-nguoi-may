@@ -80,6 +80,35 @@ export default function App() {
     setMembers(prev => [newMem, ...prev]);
   };
 
+  const handleUpdateCameras = (newCameras) => {
+    // If a camera was added
+    if (newCameras.length > cameras.length) {
+      const addedCam = newCameras.find(c => !cameras.some(old => old.id === c.id));
+      if (addedCam) {
+        const newMember = {
+          id: `MEM-${addedCam.id}`,
+          camId: addedCam.id,
+          name: addedCam.assignedTo || `Nhân Viên (${addedCam.id})`,
+          role: addedCam.role || 'Chuyên viên',
+          department: addedCam.department || addedCam.location || 'Phòng R&D',
+          currentPosture: addedCam.currentPosture || 'good',
+          ergonomicsScore: 92,
+          rank: members.length + 1,
+          avatar: addedCam.webcamUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          email: `${addedCam.id.toLowerCase()}@company.ai`,
+          workingHours: '8.0h',
+          goodPostureTime: '7.2h'
+        };
+        setMembers(prev => [newMember, ...prev]);
+      }
+    } else if (newCameras.length < cameras.length) {
+      // If a camera was removed
+      const remainingIds = new Set(newCameras.map(c => c.id));
+      setMembers(prev => prev.filter(m => remainingIds.has(m.camId)));
+    }
+    setCameras(newCameras);
+  };
+
   const handleSelectAlert = (alert) => {
     const mem = members.find(m => m.id === alert.memberId) || members[0];
     setSelectedMember(mem);
@@ -223,7 +252,7 @@ export default function App() {
                 <CameraSetupView
                   cameras={cameras}
                   members={members}
-                  onUpdateCameras={setCameras}
+                  onUpdateCameras={handleUpdateCameras}
                   mode="enterprise"
                 />
               )}

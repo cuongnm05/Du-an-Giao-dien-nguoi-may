@@ -23,9 +23,12 @@ import {
   Film,
   Users,
   Play,
-  ExternalLink
+  Pause,
+  ExternalLink,
+  Maximize2
 } from 'lucide-react';
 import { MOCK_VIDEO_RECORDINGS } from '../data/mockData';
+import WorkstationInspectorModal from './WorkstationInspectorModal';
 
 export default function DashboardView({ 
   members = [], 
@@ -36,6 +39,11 @@ export default function DashboardView({
 }) {
   const [liveClock, setLiveClock] = useState(() => new Date().toLocaleTimeString('vi-VN'));
   const [notificationToast, setNotificationToast] = useState(null);
+  const [inspectorCam, setInspectorCam] = useState(null);
+
+  // Auto patrol state
+  const [isPatrolling, setIsPatrolling] = useState(false);
+  const [patrolIndex, setPatrolIndex] = useState(0);
 
   // Clock tick
   useEffect(() => {
@@ -45,8 +53,22 @@ export default function DashboardView({
     return () => clearInterval(timer);
   }, []);
 
-  // Featured spotlight camera (e.g. PC-01 or one with alert)
-  const spotlightCam = cameras.find(c => c.status === 'warning' || c.isProcessViolating) || cameras[0] || {};
+  // Patrol cycling every 4 seconds
+  useEffect(() => {
+    let interval;
+    if (isPatrolling && cameras.length > 0) {
+      interval = setInterval(() => {
+        setPatrolIndex(prev => (prev + 1) % cameras.length);
+      }, 4000);
+    }
+    return () => clearInterval(interval);
+  }, [isPatrolling, cameras]);
+
+  // Featured spotlight camera (dynamic or cycling with patrol)
+  const defaultSpotlightCam = cameras.find(c => c.status === 'warning' || c.isProcessViolating) || cameras[0] || {};
+  const spotlightCam = isPatrolling && cameras.length > 0 
+    ? cameras[patrolIndex % cameras.length] 
+    : defaultSpotlightCam;
   const spotlightMember = members.find(m => m.camId === spotlightCam.id || m.name === spotlightCam.assignedTo) || members[0] || {};
 
   // Top 4 ranked employees for summary leaderboard snippet
@@ -113,14 +135,28 @@ export default function DashboardView({
           </p>
         </div>
 
-        {/* Nút xem toàn bộ Camera & Báo cáo */}
+        {/* Nút xem toàn bộ Camera, Tuần Tra & Báo cáo */}
         <div className="flex items-center gap-2">
+          {/* Nút Tuần Tra Tự Động */}
+          <button
+            onClick={() => setIsPatrolling(!isPatrolling)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+              isPatrolling
+                ? 'bg-amber-500 text-white border-amber-500 shadow-sm animate-pulse'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+            }`}
+            title="Tự động đảo góc nhìn qua từng máy trạm mỗi 4 giây"
+          >
+            {isPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
+            <span>{isPatrolling ? 'Dừng Tuần Tra' : 'Tuần Tra Tự Động'}</span>
+          </button>
+
           <button
             onClick={() => onNavigateTab('multicam')}
             className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <LayoutGrid className="w-4 h-4" />
-            <span>Mở Tường 32 Camera (Live)</span>
+            <span>Mở Tường {cameras.length} Camera (Live)</span>
           </button>
 
           <button
@@ -146,7 +182,7 @@ export default function DashboardView({
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              32 / 32 Máy
+              {cameras.length} / {cameras.length} Máy
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-1">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -171,7 +207,7 @@ export default function DashboardView({
               </span>
             </div>
             <div className="text-[11px] text-slate-500 mt-1">
-              28/32 nhân sự ngồi chuẩn cột sống
+              {Math.max(1, Math.round(members.length * 0.875))}/{members.length} nhân sự ngồi chuẩn cột sống
             </div>
           </div>
         </div>
@@ -237,12 +273,15 @@ export default function DashboardView({
               </span>
             </div>
 
-            {/* Màn hình camera thật sắc nét với OSD tối giản */}
-            <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 group shadow-inner">
+            {/* Màn hình camera thật sắc nét với OSD tối giản - Bấm để xem chi tiết máy */}
+            <div 
+              onClick={() => setInspectorCam(spotlightCam)}
+              className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 group shadow-inner cursor-pointer"
+            >
               <img 
                 src={spotlightCam.webcamUrl} 
                 alt={spotlightCam.name} 
-                className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95]"
+                className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95] group-hover:scale-105 transition-transform duration-300" 
               />
 
               {/* OSD Header */}
@@ -260,6 +299,14 @@ export default function DashboardView({
                 </span>
                 <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-slate-300">
                   {spotlightCam.location}
+                </span>
+              </div>
+
+              {/* Hover overlay button */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="px-3.5 py-1.5 rounded-xl bg-white/90 text-slate-900 font-bold text-xs shadow-md flex items-center gap-1.5">
+                  <Maximize2 className="w-4 h-4 text-emerald-600" />
+                  <span>Xem Chi Tiết Máy Phóng To</span>
                 </span>
               </div>
             </div>
@@ -289,22 +336,32 @@ export default function DashboardView({
             </div>
           </div>
 
-          {/* Footer nút hành động: Nhắc nhở & NÚT XEM TẤT CẢ 32 CAMERA */}
-          <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
-            <button
-              onClick={handleQuickBuzzer}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl transition-colors border border-rose-200"
-            >
-              <Bell className="w-3.5 h-3.5" />
-              <span>Gửi Chuông Nhắc Nhở</span>
-            </button>
+          {/* Footer nút hành động: Nhắc nhở, Xem chi tiết & NÚT XEM TẤT CẢ CAMERA */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleQuickBuzzer}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl transition-colors border border-rose-200"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>Gửi Chuông Nhắc Nhở</span>
+              </button>
+              
+              <button
+                onClick={() => setInspectorCam(spotlightCam)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors border border-slate-200"
+              >
+                <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Xem Chi Tiết Máy</span>
+              </button>
+            </div>
 
             {/* Nút Xem Tất Cả Camera theo đúng tư duy Dashboard */}
             <button
               onClick={() => onNavigateTab('multicam')}
               className="flex items-center gap-1 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-xs transition-all"
             >
-              <span>Xem Tất Cả 32 Camera</span>
+              <span>Xem Tất Cả {cameras.length} Camera</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -342,7 +399,7 @@ export default function DashboardView({
 
           {/* Footer nút Xem Tất Cả Danh Sách Nhân Viên */}
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-500 text-[11px]">Tổng cộng 32 nhân viên chính thức</span>
+            <span className="text-slate-500 text-[11px]">Tổng cộng {members.length} nhân sự</span>
             <button
               onClick={() => onNavigateTab('members')}
               className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1"
@@ -403,7 +460,7 @@ export default function DashboardView({
               onClick={() => onNavigateTab('rankings')}
               className="w-full py-1.5 text-center font-bold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-xl transition-colors flex items-center justify-center gap-1 text-xs"
             >
-              <span>Xem Tất Cả 32 Nhân Viên (Xếp Hạng & Thưởng)</span>
+              <span>Xem Tất Cả {members.length} Nhân Viên (Xếp Hạng & Thưởng)</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -493,6 +550,18 @@ export default function DashboardView({
         </div>
 
       </div>
+
+      {/* Enlarged Workstation Inspector Modal */}
+      {inspectorCam && (
+        <WorkstationInspectorModal
+          cam={inspectorCam}
+          member={members.find(m => m.camId === inspectorCam.id || m.name === inspectorCam.assignedTo) || spotlightMember}
+          onClose={() => setInspectorCam(null)}
+          onSendBuzzer={() => {
+            handleQuickBuzzer();
+          }}
+        />
+      )}
 
     </div>
   );

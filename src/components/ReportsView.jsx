@@ -135,7 +135,7 @@ export default function ReportsView({ members = [] }) {
           <div className="text-lg font-bold text-slate-900 font-mono mt-0.5">
             {dateRange === 'day' ? '256 Giờ' : dateRange === 'week' ? '1,320 Giờ' : dateRange === 'month' ? '5,480 Giờ' : '58,420 Giờ'}
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Trên 32 máy tính nhân viên</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">Trên {members.length} máy tính nhân viên</div>
         </div>
 
         <div className="p-3 bg-white border border-slate-200 rounded-xl">
@@ -153,35 +153,90 @@ export default function ReportsView({ members = [] }) {
         </div>
       </div>
 
-      {/* Biểu đồ xu hướng */}
-      <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
-            {dateRange === 'day' ? 'Biểu Đồ Tư Thế Theo Từng Khung Giờ Trong Ngày' :
-             dateRange === 'week' ? 'Biểu Đồ Tư Thế 7 Ngày Trong Tuần' :
-             dateRange === 'month' ? 'Biểu Đồ Tư Thế 4 Tuần Trong Tháng' :
-             'Biểu Đồ Tư Thế & Năng Suất Qua 12 Tháng Trong Năm'}
-          </span>
-          <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
-            Tỷ lệ ngồi chuẩn: 94%
-          </span>
+      {/* Biểu đồ xu hướng chuyên sâu (h-72 / h-80, có lưới Y-axis, cột kép so le trực quan) */}
+      <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-900 block">
+              {dateRange === 'day' ? 'Biểu Đồ Tư Thế Theo Từng Khung Giờ Trong Ngày' :
+               dateRange === 'week' ? 'Biểu Đồ Tư Thế 7 Ngày Trong Tuần' :
+               dateRange === 'month' ? 'Biểu Đồ Tư Thế 4 Tuần Trong Tháng' :
+               'Biểu Đồ Xu Hướng Tư Thế & Năng Suất 12 Tháng Trong Năm'}
+            </span>
+            <span className="text-[11px] text-slate-400">Phân tích song song điểm công thái học & thời lượng tập trung</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-600">
+              <span className="w-3 h-3 rounded bg-emerald-500"></span>
+              <span>Điểm Tư Thế AI</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-600">
+              <span className="w-3 h-3 rounded bg-teal-400"></span>
+              <span>Giờ Tập Trung</span>
+            </div>
+            <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 ml-1">
+              TB Ngồi Chuẩn: 94.2%
+            </span>
+          </div>
         </div>
 
-        {/* Bar chart */}
-        <div className="grid grid-cols-12 gap-2 h-44 items-end pt-4 border-b border-slate-200 pb-2">
-          {ANNUAL_REPORT_METRICS.map(item => (
-            <div key={item.month} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-              <div className="text-[10px] font-mono text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                {item.postureScore}đ
-              </div>
-              <div
-                style={{ height: `${(item.postureScore - 60) * 2.6}%` }}
-                className="w-full bg-gradient-to-t from-emerald-600 to-teal-400 hover:brightness-110 rounded-t-lg transition-all cursor-pointer shadow-xs"
-                title={`Tháng ${item.month}: Điểm tư thế ${item.postureScore}/100, Tổng ${item.focusHours} giờ`}
-              ></div>
-              <span className="text-[10px] font-bold text-slate-600">{item.month}</span>
+        {/* Biểu đồ có hệ trục tọa độ & đường lưới ngang Y-axis */}
+        <div className="relative h-72 sm:h-80 w-full pt-4 pb-6 pl-10 pr-2">
+          {/* Đường lưới Y-axis */}
+          <div className="absolute inset-0 pl-10 pb-6 flex flex-col justify-between pointer-events-none text-[10px] font-mono text-slate-400">
+            <div className="border-b border-slate-100 flex items-center justify-between">
+              <span className="-ml-9">100%</span>
             </div>
-          ))}
+            <div className="border-b border-slate-100 flex items-center justify-between">
+              <span className="-ml-9">75%</span>
+            </div>
+            <div className="border-b border-slate-100 flex items-center justify-between">
+              <span className="-ml-9">50%</span>
+            </div>
+            <div className="border-b border-slate-100 flex items-center justify-between">
+              <span className="-ml-9">25%</span>
+            </div>
+            <div className="border-b border-slate-200 flex items-center justify-between">
+              <span className="-ml-9">0%</span>
+            </div>
+          </div>
+
+          {/* Cột dữ liệu so le cao nổi bật */}
+          <div className="relative h-full w-full grid grid-cols-12 gap-1.5 sm:gap-3 items-end">
+            {ANNUAL_REPORT_METRICS.map(item => {
+              // Staggered calculation to ensure prominent alternating peaks
+              const ergoHeight = Math.max(25, item.postureScore);
+              const hoursRatio = Math.max(20, Math.round((item.focusHours / 185) * 92));
+
+              return (
+                <div key={item.month} className="flex flex-col items-center h-full justify-end group relative">
+                  
+                  {/* Tooltip on hover */}
+                  <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                    Tháng {item.month}: <b>{item.postureScore}đ</b> • {item.focusHours}h
+                  </div>
+
+                  {/* Dual Bars Container */}
+                  <div className="w-full flex items-end justify-center gap-1 h-full pb-1">
+                    {/* Bar 1: Điểm tư thế (Emerald) */}
+                    <div
+                      style={{ height: `${ergoHeight}%` }}
+                      className="w-1/2 max-w-[16px] bg-gradient-to-t from-emerald-600 via-emerald-500 to-teal-400 rounded-t-md transition-all group-hover:brightness-110 shadow-2xs"
+                    ></div>
+
+                    {/* Bar 2: Giờ làm việc (Teal) */}
+                    <div
+                      style={{ height: `${hoursRatio}%` }}
+                      className="w-1/2 max-w-[16px] bg-gradient-to-t from-teal-500 to-cyan-300 rounded-t-md transition-all group-hover:brightness-110 shadow-2xs"
+                    ></div>
+                  </div>
+
+                  <span className="text-[10px] font-bold text-slate-600 mt-1">{item.month}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

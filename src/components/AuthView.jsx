@@ -35,6 +35,7 @@ export default function AuthView({
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newResetPassword, setNewResetPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -67,46 +68,119 @@ export default function AuthView({
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const userRole = selectedRole;
-    const userEmail = email.trim() || (userRole === SYSTEM_MODES.ENTERPRISE ? 'admin.enterprise@company.com' : 'user.personal@gmail.com');
-    const userName = fullName.trim() || (userRole === SYSTEM_MODES.ENTERPRISE ? 'Quản Trị Doanh Nghiệp' : 'Người Dùng Cá Nhân');
+    if (!email.trim()) {
+      showToast('Vui lòng nhập địa chỉ email hợp lệ!');
+      return;
+    }
+    if (!password || password.length < 6) {
+      showToast('Mật khẩu phải có tối thiểu 6 ký tự!');
+      return;
+    }
 
-    showToast(`Đăng nhập thành công với vai trò ${userRole === SYSTEM_MODES.ENTERPRISE ? 'Doanh Nghiệp' : 'Cá Nhân'}!`);
+    const userRole = selectedRole;
+    // Check if account already saved
+    const existing = savedAccounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase());
+    const userName = existing ? existing.name : (fullName.trim() || (userRole === SYSTEM_MODES.ENTERPRISE ? 'Quản Trị Doanh Nghiệp' : 'Người Dùng Cá Nhân'));
+
+    const loggedUser = {
+      email: email.trim(),
+      name: userName,
+      role: existing ? existing.role : userRole
+    };
+
+    // If new, save to savedAccounts
+    if (!existing) {
+      setSavedAccounts(prev => [
+        ...prev,
+        {
+          id: `acc-${Date.now()}`,
+          name: userName,
+          email: email.trim(),
+          role: userRole,
+          avatar: userRole === SYSTEM_MODES.ENTERPRISE 
+            ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+            : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+          tag: userRole === SYSTEM_MODES.ENTERPRISE ? 'Tổ chức / Doanh nghiệp' : 'Cá nhân (Work from home)'
+        }
+      ]);
+    }
+
+    showToast(`Đăng nhập thành công với vai trò ${loggedUser.role === SYSTEM_MODES.ENTERPRISE ? 'Doanh Nghiệp' : 'Cá Nhân'}!`);
     setTimeout(() => {
-      onLoginSuccess({
-        email: userEmail,
-        name: userName,
-        role: userRole
-      });
+      onLoginSuccess(loggedUser);
     }, 600);
   };
 
   const handleGoogleAuth = () => {
-    showToast(`Đã liên kết tài khoản Google thành công! Đang chuyển hướng...`);
+    const userRole = selectedRole;
+    const googleUser = {
+      email: userRole === SYSTEM_MODES.ENTERPRISE ? 'enterprise.google@company.com' : 'personal.google@gmail.com',
+      name: userRole === SYSTEM_MODES.ENTERPRISE ? 'Admin Doanh Nghiệp (Google)' : 'Nguyễn Văn Cường (Google)',
+      role: userRole
+    };
+
+    // Ensure saved
+    if (!savedAccounts.some(a => a.email === googleUser.email)) {
+      setSavedAccounts(prev => [
+        ...prev,
+        {
+          id: `acc-google-${Date.now()}`,
+          name: googleUser.name,
+          email: googleUser.email,
+          role: userRole,
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          tag: userRole === SYSTEM_MODES.ENTERPRISE ? 'Doanh nghiệp (Google)' : 'Cá nhân (Google)'
+        }
+      ]);
+    }
+
+    showToast(`Đã xác thực tài khoản Google thành công! Đang chuyển hướng...`);
     setTimeout(() => {
-      onLoginSuccess({
-        email: selectedRole === SYSTEM_MODES.ENTERPRISE ? 'enterprise.google@company.com' : 'personal.google@gmail.com',
-        name: selectedRole === SYSTEM_MODES.ENTERPRISE ? 'Enterprise Admin (Google)' : 'Personal User (Google)',
-        role: selectedRole
-      });
+      onLoginSuccess(googleUser);
     }, 700);
   };
 
   const handleRegister = (e) => {
     e.preventDefault();
-    showToast(`Đăng ký tài khoản thành công! Tự động đăng nhập với vai trò ${selectedRole === SYSTEM_MODES.ENTERPRISE ? 'Doanh nghiệp' : 'Cá nhân'}.`);
+    if (!fullName.trim()) {
+      showToast('Vui lòng nhập họ và tên của bạn!');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      showToast('Vui lòng nhập địa chỉ email hợp lệ!');
+      return;
+    }
+    if (!password || password.length < 6) {
+      showToast('Mật khẩu phải có tối thiểu 6 ký tự!');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showToast('Mật khẩu và xác nhận mật khẩu không trùng khớp!');
+      return;
+    }
+
+    const newAcc = {
+      id: `acc-${Date.now()}`,
+      name: fullName.trim(),
+      email: email.trim(),
+      role: selectedRole,
+      avatar: selectedRole === SYSTEM_MODES.ENTERPRISE
+        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      tag: selectedRole === SYSTEM_MODES.ENTERPRISE ? 'Tổ chức / Doanh nghiệp' : 'Cá nhân (Mới tạo)'
+    };
+
+    setSavedAccounts(prev => [newAcc, ...prev]);
+
+    showToast(`Đăng ký tài khoản thành công! Tự động đăng nhập vào giao diện ${selectedRole === SYSTEM_MODES.ENTERPRISE ? 'Doanh nghiệp' : 'Cá nhân'}.`);
     setTimeout(() => {
-      onLoginSuccess({
-        email: email || 'newuser@system.ai',
-        name: fullName || 'Thành Viên Mới',
-        role: selectedRole
-      });
+      onLoginSuccess(newAcc);
     }, 700);
   };
 
   const handleSelectSavedAccount = (acc) => {
     setSelectedRole(acc.role);
-    showToast(`Đã chọn tài khoản: ${acc.name}`);
+    showToast(`Đã chuyển sang tài khoản: ${acc.name} (${acc.role === SYSTEM_MODES.ENTERPRISE ? 'Doanh Nghiệp' : 'Cá Nhân'})`);
     setTimeout(() => {
       onLoginSuccess(acc);
     }, 500);
@@ -123,7 +197,7 @@ export default function AuthView({
         </div>
       )}
 
-      {/* Top Navbar */}
+      {/* Top Navbar - Clean, no bypass button */}
       <header className="px-6 py-4 border-b border-slate-200/80 bg-white/80 backdrop-blur-md flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 p-0.5 shadow-md shadow-emerald-600/20 flex items-center justify-center">
@@ -139,14 +213,10 @@ export default function AuthView({
           </div>
         </div>
 
-        {/* Nút Trang Chủ điều hướng ngay đến giao diện chính */}
-        <button
-          onClick={() => onGoHome(selectedRole)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all shadow-2xs hover:text-emerald-700"
-        >
-          <Home className="w-4 h-4 text-emerald-600" />
-          <span>Vào Trang Chủ ({selectedRole === SYSTEM_MODES.ENTERPRISE ? 'Doanh Nghiệp' : 'Cá Nhân'})</span>
-        </button>
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <span>Cổng Đăng Nhập & Phân Quyền Bảo Mật</span>
+        </div>
       </header>
 
       {/* Main Form Center Box */}
@@ -494,10 +564,12 @@ export default function AuthView({
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Mật khẩu mới:
+                      Mật khẩu mới (Tối thiểu 6 ký tự):
                     </label>
                     <input
                       type="password"
+                      value={newResetPassword}
+                      onChange={(e) => setNewResetPassword(e.target.value)}
                       placeholder="Nhập mật khẩu mới"
                       className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
                     />
@@ -505,8 +577,19 @@ export default function AuthView({
                   <button
                     type="button"
                     onClick={() => {
-                      showToast('Đã đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
+                      if (!otpCode || otpCode.length < 4) {
+                        showToast('Vui lòng nhập mã OTP xác thực hợp lệ!');
+                        return;
+                      }
+                      if (!newResetPassword || newResetPassword.length < 6) {
+                        showToast('Mật khẩu mới phải có tối thiểu 6 ký tự!');
+                        return;
+                      }
+                      setPassword(newResetPassword);
+                      showToast('✓ Đã đặt lại mật khẩu thành công! Vui lòng sử dụng mật khẩu mới để đăng nhập.');
                       setForgotStep(1);
+                      setOtpCode('');
+                      setNewResetPassword('');
                       setAuthStep('login');
                     }}
                     className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs shadow-xs"
@@ -577,15 +660,13 @@ export default function AuthView({
             </div>
           )}
 
-          {/* Quick Home Direct Access */}
+          {/* Security note */}
           <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Khám phá ngay không cần đăng nhập:</span>
-            <button
-              onClick={() => onGoHome(selectedRole)}
-              className="text-emerald-600 hover:text-emerald-700 font-bold hover:underline flex items-center gap-1"
-            >
-              <span>Vào thẳng {selectedRole === SYSTEM_MODES.ENTERPRISE ? 'Doanh Nghiệp' : 'Cá Nhân'} &rarr;</span>
-            </button>
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Bảo mật dữ liệu công thái học & hình ảnh camera</span>
+            </span>
+            <span className="text-[11px] font-mono text-emerald-700 font-semibold">Mã hóa 256-bit</span>
           </div>
 
         </div>

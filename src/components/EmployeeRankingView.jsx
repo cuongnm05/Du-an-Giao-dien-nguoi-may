@@ -272,8 +272,8 @@ export default function EmployeeRankingView({ members = [] }) {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium"
               >
-                <option value="rank_asc">🏆 Thứ hạng (Top 1 ➔ Top 32)</option>
-                <option value="rank_desc">🔻 Thứ hạng (Top 32 ➔ Top 1)</option>
+                <option value="rank_asc">🏆 Thứ hạng (Cao nhất đến thấp nhất)</option>
+                <option value="rank_desc">🔻 Thứ hạng (Thấp nhất đến cao nhất)</option>
                 <option value="ergo_desc">🧘 Điểm công thái học (Cao ➔ Thấp)</option>
                 <option value="ergo_asc">⚠️ Điểm công thái học (Thấp ➔ Cao)</option>
                 <option value="hours_desc">⏱️ Giờ làm việc (Nhiều nhất ➔ Ít nhất)</option>

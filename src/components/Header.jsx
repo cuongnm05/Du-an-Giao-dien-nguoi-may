@@ -203,18 +203,6 @@ export default function Header({
                   </span>
                 </div>
 
-                {/* Chuyển nhanh giữa Doanh Nghiệp & Cá Nhân */}
-                <button
-                  onClick={() => {
-                    setMode(isPersonal ? SYSTEM_MODES.ENTERPRISE : SYSTEM_MODES.PERSONAL);
-                    setShowUserDropdown(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition-colors font-medium text-left"
-                >
-                  <Repeat className="w-4 h-4 text-emerald-600" />
-                  <span>Chuyển sang {isPersonal ? 'Giao diện Doanh Nghiệp' : 'Giao diện Cá Nhân'}</span>
-                </button>
-
                 {/* Thêm / Chuyển tài khoản khác */}
                 <button
                   onClick={() => {

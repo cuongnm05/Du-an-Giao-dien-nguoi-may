@@ -221,20 +221,18 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* Switcher Mode Button at Bottom of Sidebar */}
+      {/* Session info badge at Bottom of Sidebar */}
       {!isCollapsed && (
-        <div className="p-3 border-t border-slate-100 space-y-2">
-          <button
-            onClick={() => {
-              const newMode = isPersonal ? SYSTEM_MODES.ENTERPRISE : SYSTEM_MODES.PERSONAL;
-              setMode(newMode);
-              setCurrentTab(isPersonal ? 'dashboard' : 'personal_desk');
-            }}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-xs font-bold text-slate-700 transition-all shadow-2xs"
-          >
-            <Repeat className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Đổi Sang {isPersonal ? 'Doanh Nghiệp' : 'Cá Nhân'}</span>
-          </button>
+        <div className="p-3 border-t border-slate-100">
+          <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="min-w-0 flex-1">
+              <div className="font-bold text-slate-800 truncate">
+                {isPersonal ? 'Chế Độ Cá Nhân' : 'Chế Độ Doanh Nghiệp'}
+              </div>
+              <div className="text-[10px] text-slate-400 truncate">Phiên làm việc bảo mật</div>
+            </div>
+          </div>
         </div>
       )}
     </aside>
