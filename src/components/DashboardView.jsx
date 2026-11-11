@@ -135,14 +135,14 @@ export default function DashboardView({
           </p>
         </div>
 
-        {/* Nút xem toàn bộ Camera, Tuần Tra & Báo cáo */}
+        {/* Nút xem toàn bộ Camera, Giám Sát & Báo cáo */}
         <div className="flex items-center gap-2">
-          {/* Nút Tuần Tra Tự Động */}
+          {/* Nút Giám Sát Tự Động */}
           <button
             onClick={() => {
               const next = !isPatrolling;
               setIsPatrolling(next);
-              setNotificationToast(next ? 'Đã bật chế độ tuần tra tự động qua các máy trạm!' : 'Đã dừng tuần tra tự động.');
+              setNotificationToast(next ? 'Đã bật chế độ giám sát tự động qua các máy trạm!' : 'Đã dừng giám sát tự động.');
               setTimeout(() => setNotificationToast(null), 3500);
             }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
@@ -153,7 +153,7 @@ export default function DashboardView({
             title="Tự động đảo góc nhìn qua từng máy trạm mỗi 4 giây"
           >
             {isPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
-            <span>{isPatrolling ? 'Dừng Tuần Tra' : 'Tuần Tra Tự Động'}</span>
+            <span>{isPatrolling ? 'Dừng Giám Sát' : 'Giám Sát Tự Động'}</span>
           </button>
 
           <button

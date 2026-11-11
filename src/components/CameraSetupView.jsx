@@ -1192,7 +1192,7 @@ export default function CameraSetupView({
 
                   <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
                     <div>
-                      <div className="font-semibold text-slate-800">Tuần tra đa camera xoay vòng tự động</div>
+                      <div className="font-semibold text-slate-800">Giám sát đa camera xoay vòng tự động</div>
                       <div className="text-[11px] text-slate-500">Chuyển luồng tiêu điểm mỗi {autoPatrolInterval} giây</div>
                     </div>
                     <select

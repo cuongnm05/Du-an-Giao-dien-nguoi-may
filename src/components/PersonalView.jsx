@@ -389,22 +389,22 @@ export default function PersonalView({
               </p>
             </div>
 
-            {/* Nút Tuần Tra Cá Nhân, bật/tắt thông báo & thời khóa biểu */}
+            {/* Nút Giám Sát Cá Nhân, bật/tắt thông báo & thời khóa biểu */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   setIsPersonalPatrolling(!isPersonalPatrolling);
-                  showToast(!isPersonalPatrolling ? 'Đã bật chế độ Tuần Tra Giám Sát Cá Nhân Tự Động (AI Pose & Screen Real-time)!' : 'Đã dừng tuần tra cá nhân.');
+                  showToast(!isPersonalPatrolling ? 'Đã bật chế độ Giám Sát Cá Nhân Tự Động (AI Pose & Screen Real-time)!' : 'Đã dừng giám sát cá nhân.');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                   isPersonalPatrolling 
                     ? 'bg-amber-500 text-white border-amber-500 shadow-xs animate-pulse' 
                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
                 }`}
-                title="Tự động tuần tra phân tích góc ngồi và tiến trình làm việc"
+                title="Tự động giám sát phân tích góc ngồi và tiến trình làm việc"
               >
                 {isPersonalPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
-                <span>{isPersonalPatrolling ? 'Dừng Tuần Tra' : 'Tuần Tra Cá Nhân'}</span>
+                <span>{isPersonalPatrolling ? 'Dừng Giám Sát' : 'Giám Sát Cá Nhân'}</span>
               </button>
 
               <button

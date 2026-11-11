@@ -193,12 +193,12 @@ export default function MultiCameraView({
             </button>
           </div>
 
-          {/* Nút Tuần Tra Tự Động & Nhắc Toàn Phòng */}
+          {/* Nút Giám Sát Tự Động & Nhắc Toàn Phòng */}
           <button
             onClick={() => {
               const next = !isPatrolling;
               setIsPatrolling(next);
-              setBroadcastNotice(next ? 'Đã bật chế độ tự động tuần tra quét qua các máy trạm!' : 'Đã dừng tuần tra tự động.');
+              setBroadcastNotice(next ? 'Đã bật chế độ tự động giám sát quét qua các máy trạm!' : 'Đã dừng giám sát tự động.');
               setTimeout(() => setBroadcastNotice(null), 3500);
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold transition-all border ${
@@ -208,7 +208,7 @@ export default function MultiCameraView({
             }`}
           >
             {isPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
-            <span>{isPatrolling ? 'Dừng Tuần Tra' : 'Tuần Tra'}</span>
+            <span>{isPatrolling ? 'Dừng Giám Sát' : 'Giám Sát Tự Động'}</span>
           </button>
 
           <button
