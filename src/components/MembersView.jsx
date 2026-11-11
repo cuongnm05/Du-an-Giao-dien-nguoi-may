@@ -26,6 +26,12 @@ export default function MembersView({
   const [selectedDept, setSelectedDept] = useState('ALL');
   const [selectedHealthStatus, setSelectedHealthStatus] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const [newMemberData, setNewMemberData] = useState({
     name: '',
@@ -72,11 +78,19 @@ export default function MembersView({
         { time: '16:00', score: 86 }
       ]
     });
+    showToast(`✓ Đã thêm thành công hồ sơ nhân viên ${newMemberData.name} (${newMemberData.code})!`);
     setShowAddModal(false);
   };
 
   return (
     <div className="space-y-4">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-emerald-600 text-white rounded-xl shadow-xl text-xs font-semibold animate-in slide-in-from-bottom-3">
+          <CheckCircle2 className="w-4 h-4 text-white" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
       
       {/* Thanh Công Cụ & Bộ Lọc Trực Tiếp (Không có ô văn bản giải thích thừa thãi) */}
       <div className="p-3 bg-white border border-slate-200 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 text-xs shadow-xs">

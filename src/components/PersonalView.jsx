@@ -16,6 +16,7 @@ import {
   ShieldCheck, 
   Laptop, 
   Video, 
+  VideoOff,
   Layers, 
   TrendingUp, 
   Check, 
@@ -67,15 +68,22 @@ export default function PersonalView({
   const [activeTask, setActiveTask] = useState(timetable[1]);
   const [inspectorPersonalCam, setInspectorPersonalCam] = useState(null);
   const [isPersonalPatrolling, setIsPersonalPatrolling] = useState(false);
+  const [isWebcamAiActive, setIsWebcamAiActive] = useState(true);
+  const [autoDetectPosture, setAutoDetectPosture] = useState(true);
   
   // Real-time Anti-Procrastination Assistant State
   const [isAiAssistantActive, setIsAiAssistantActive] = useState(true);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true); // Tắt thông báo nhắc nhở nếu không thích
   const [currentDistractionAlert, setCurrentDistractionAlert] = useState(null);
+  const [aiScheduleAlert, setAiScheduleAlert] = useState(null);
+  const [isAutoScheduleReminder, setIsAutoScheduleReminder] = useState(true);
+  const [soundReminder, setSoundReminder] = useState(true);
   const [nextTaskReminder, setNextTaskReminder] = useState({
+    id: 'TT-03',
     title: 'Giãn Cơ Cột Sống & Vận Động Nhẹ',
     time: '11:30 - 12:00',
-    app: 'Nhắc nhở công thái học'
+    app: 'Nhắc nhở công thái học',
+    status: 'upcoming'
   });
 
   // Report Period State (Ngày, Tuần, Tháng, Năm)
@@ -89,12 +97,12 @@ export default function PersonalView({
   const [rankSearchQuery, setRankSearchQuery] = useState('');
 
   // Dữ liệu 3 luồng giám sát Bàn Làm Việc Cá Nhân
-  const personalWorkstationData = {
+  const personalWorkstation = {
     id: 'MY-DESK-01',
     name: 'Bàn Làm Việc & Trạm Máy Cá Nhân',
     location: 'Góc Làm Việc Cá Nhân - Home Office',
     assignedTo: 'Nguyễn Văn Cường',
-    webcamUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+    webcamUrl: '/webcam/personal_desk_webcam_pov.jpg',
     currentPosture: 'good',
     screenStream: {
       screenUrl: SCREEN_STREAM_IMAGES.vscode,
@@ -202,6 +210,24 @@ export default function PersonalView({
     });
   };
 
+  // Trợ lý AI nhắc nhở khi đến lịch trình
+  const handleTriggerAiScheduleReminder = () => {
+    if (!isNotificationsEnabled) {
+      showToast('Thông báo đang tắt. Vui lòng bật lại thông báo để nhận lời nhắc từ Trợ lý AI.');
+      return;
+    }
+    const target = timetable.find(t => t.status === 'upcoming') || nextTaskReminder || timetable[2];
+    setAiScheduleAlert({
+      id: target.id || 'TT-03',
+      time: target.time || '11:30 - 12:00',
+      title: target.title || 'Giãn Cơ Cột Sống & Vận Động Nhẹ',
+      targetApp: target.targetApp || 'Nhắc nhở công thái học',
+      note: target.note || 'Uống 300ml nước và thực hiện bài tập giãn cơ cổ vai gáy',
+      message: `Chào Cường, đồng hồ hệ thống báo đã đến khung giờ ${target.time}! Đã đến lúc thực hiện: "${target.title}". Hãy mở ứng dụng "${target.targetApp || 'Hệ thống'}" để duy trì năng suất nhé!`
+    });
+    showToast('🔔 Trợ lý AI: Đã đến giờ hẹn theo lịch trình!');
+  };
+
   return (
     <div className="space-y-3 w-full">
       
@@ -255,6 +281,91 @@ export default function PersonalView({
             <button
               onClick={() => setCurrentDistractionAlert(null)}
               className="p-1 text-rose-500 hover:text-rose-700 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* THÔNG BÁO TRỢ LÝ AI: NHẮC NHỞ ĐẾN GIỜ LỊCH TRÌNH */}
+      {aiScheduleAlert && isNotificationsEnabled && (
+        <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-white border-2 border-emerald-400 rounded-2xl text-emerald-950 shadow-md animate-in slide-in-from-top-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-sm shrink-0 mt-0.5">
+              <Brain className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-2xs">
+                  TRỢ LÝ AI: ĐÃ ĐẾN GIỜ THEO LỊCH TRÌNH
+                </span>
+                <span className="font-mono text-emerald-800 font-bold bg-white px-2 py-0.5 rounded border border-emerald-200">{aiScheduleAlert.time}</span>
+              </div>
+              <div className="font-bold text-sm text-slate-900">{aiScheduleAlert.title}</div>
+              <p className="text-slate-600 text-[11px] leading-relaxed max-w-xl">
+                {aiScheduleAlert.message}
+              </p>
+              <div className="text-[10px] text-emerald-700 font-medium">
+                Ứng dụng đề xuất: <span className="font-mono font-bold text-emerald-800">{aiScheduleAlert.targetApp}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+            <button
+              onClick={() => {
+                setActiveTask({
+                  id: aiScheduleAlert.id,
+                  time: aiScheduleAlert.time,
+                  title: aiScheduleAlert.title,
+                  targetApp: aiScheduleAlert.targetApp,
+                  note: aiScheduleAlert.note || 'Bắt đầu theo nhắc nhở của Trợ lý AI',
+                  status: 'in_progress'
+                });
+                setNextTaskReminder(prev => ({
+                  ...prev,
+                  id: aiScheduleAlert.id,
+                  title: aiScheduleAlert.title,
+                  time: aiScheduleAlert.time,
+                  app: aiScheduleAlert.targetApp,
+                  status: 'in_progress'
+                }));
+                setTimetable(prev => prev.map(t => {
+                  if (t.id === aiScheduleAlert.id || t.title === aiScheduleAlert.title) return { ...t, status: 'in_progress' };
+                  if (t.status === 'in_progress') return { ...t, status: 'completed' };
+                  return t;
+                }));
+                setIsPomodoroRunning(true);
+                setIsWebcamAiActive(true);
+                setAiScheduleAlert(null);
+                showToast(`🚀 Đã khởi động nhiệm vụ "${aiScheduleAlert.title}" & bật Pomodoro 25p!`);
+              }}
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Play className="w-3.5 h-3.5" />
+              <span>Bắt Đầu Nhiệm Vụ Ngay</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const alertCopy = aiScheduleAlert;
+                setAiScheduleAlert(null);
+                showToast('⏰ Trợ lý AI sẽ nhắc lại sau 5 phút!');
+                setTimeout(() => {
+                  setAiScheduleAlert(alertCopy);
+                }, 300000);
+              }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors border border-slate-200 cursor-pointer text-xs"
+              title="Nhắc lại sau 5 phút"
+            >
+              <span>Nhắc Sau 5 Phút</span>
+            </button>
+
+            <button
+              onClick={() => setAiScheduleAlert(null)}
+              className="p-1.5 text-slate-400 hover:text-slate-600 font-bold rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Đóng thông báo"
             >
               ✕
             </button>
@@ -420,39 +531,81 @@ export default function PersonalView({
                     <Camera className="w-4 h-4 text-emerald-600" />
                     <span className="font-bold text-slate-900 text-sm">Camera Bàn Làm Việc AI Cá Nhân</span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    LIVE FEED • AI ON
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                      title="Mở toàn màn hình xem chi tiết 3 luồng (Webcam, Màn hình, Phím & chuột)"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Phóng To Chi Tiết Máy</span>
+                    </button>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
+                      isWebcamAiActive
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    }`}>
+                      {isWebcamAiActive ? 'LIVE FEED • AI ON' : 'CAMERA • ĐÃ TẠM DỪNG'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Viewport Camera Live sắc nét - Bấm để phóng to xem chi tiết */}
                 <div 
                   onClick={() => setInspectorPersonalCam(personalWorkstation)}
                   className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 group shadow-inner cursor-pointer"
+                  title="Nhấp để phóng to toàn màn hình chi tiết máy"
                 >
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
-                    alt="Personal Live Camera"
-                    className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95] group-hover:scale-105 transition-transform duration-300"
-                  />
+                  {isWebcamAiActive ? (
+                    <>
+                      <img
+                        src="/webcam/personal_desk_webcam_pov.jpg"
+                        alt="Personal Live Camera"
+                        className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95] group-hover:scale-105 transition-transform duration-300"
+                      />
 
-                  {/* OSD Header */}
-                  <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-white font-mono text-[10px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                    <span>1080P @ 30FPS</span>
-                    <span>•</span>
-                    <span>Home Office</span>
-                  </div>
+                      {/* OSD Header */}
+                      <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-white font-mono text-[10px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                        <span>1080P @ 30FPS</span>
+                        <span>•</span>
+                        <span>Home Office</span>
+                      </div>
 
-                  {/* OSD Posture Status */}
-                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[11px] font-mono">
-                    <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-emerald-300 font-bold">
-                      ✓ Tư thế chuẩn (Lưng thẳng 98° • Cổ 14°)
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-slate-300">
-                      Khoảng cách: 65cm
-                    </span>
-                  </div>
+                      {/* Nút Phóng To góc trên phải */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInspectorPersonalCam(personalWorkstation);
+                        }}
+                        className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/75 hover:bg-black/90 backdrop-blur-md text-white font-mono text-[10px] font-bold transition-all border border-white/20 hover:border-emerald-400 group-hover:scale-105 cursor-pointer shadow-sm"
+                        title="Phóng to chi tiết máy"
+                      >
+                        <Maximize2 className="w-3 h-3 text-emerald-400" />
+                        <span>Phóng to</span>
+                      </button>
+
+                      {/* OSD Posture Status */}
+                      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[11px] font-mono">
+                        <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-emerald-300 font-bold">
+                          ✓ Tư thế chuẩn (Lưng thẳng 98° • Cổ 14°)
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-slate-300">
+                          Khoảng cách: 65cm
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-400 gap-2 p-4 text-center">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400 shadow-inner">
+                        <VideoOff className="w-6 h-6 text-slate-400" />
+                      </div>
+                      <div className="text-xs font-mono font-bold text-slate-200">WEBCAM AI ĐANG TẠM DỪNG</div>
+                      <div className="text-[11px] text-slate-400 max-w-xs">
+                        Đã tạm ngắt luồng nhận diện tư thế để bảo vệ quyền riêng tư cá nhân.
+                      </div>
+                    </div>
+                  )}
 
                   {/* Hover overlay button */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -495,7 +648,16 @@ export default function PersonalView({
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-xs transition-colors"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
-                  <span>Xem Chi Tiết Bàn Máy</span>
+                  <span>Xem Chi Tiết Máy Phóng To</span>
+                </button>
+
+                <button
+                  onClick={handleTriggerAiScheduleReminder}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-xl text-xs transition-colors border border-emerald-200 cursor-pointer"
+                  title="Thử nghiệm Trợ lý AI nhắc nhở khi đến lịch trình"
+                >
+                  <Brain className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Trợ Lý AI Nhắc Lịch</span>
                 </button>
 
                 <button
@@ -537,7 +699,11 @@ export default function PersonalView({
 
                 <div className="flex items-center justify-center gap-2">
                   <button
-                    onClick={() => setIsPomodoroRunning(!isPomodoroRunning)}
+                    onClick={() => {
+                      const next = !isPomodoroRunning;
+                      setIsPomodoroRunning(next);
+                      showToast(next ? 'Đã bắt đầu hiệp tập trung Pomodoro 25 phút!' : 'Đã tạm dừng đồng hồ Pomodoro.');
+                    }}
                     className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
                       isPomodoroRunning
                         ? 'bg-amber-500 text-white shadow-amber-500/20'
@@ -563,7 +729,73 @@ export default function PersonalView({
                 </div>
               </div>
 
-              {/* Box 2: Nhiệm Vụ Hôm Nay Tinh Gọn */}
+              {/* Box 2: Webcam AI Tự Động (Bật/Dừng) */}
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4 text-emerald-600" />
+                    <span className="font-bold text-slate-900 text-sm">Webcam AI Tự Động</span>
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                    isWebcamAiActive
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-slate-100 text-slate-500 border border-slate-200'
+                  }`}>
+                    {isWebcamAiActive ? '● ĐANG HOẠT ĐỘNG' : '○ ĐÃ TẠM DỪNG'}
+                  </span>
+                </div>
+
+                <div className="text-xs text-slate-600 space-y-2">
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    AI liên tục phân tích góc nghiêng đốt sống, cự ly mắt (65cm) và nhắc nhở tư thế sai tự động theo thời gian thực.
+                  </p>
+
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[11px]">
+                    <span className="text-slate-700 font-medium">Tự động nhận diện khi ngồi vào bàn:</span>
+                    <button
+                      onClick={() => {
+                        const next = !autoDetectPosture;
+                        setAutoDetectPosture(next);
+                        showToast(next ? 'Đã bật: Tự động kích hoạt AI khi có người ngồi vào bàn' : 'Đã tắt tự động nhận diện');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-colors ${
+                        autoDetectPosture ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {autoDetectPosture ? 'Đang Bật' : 'Đang Tắt'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-0.5">
+                  <button
+                    onClick={() => {
+                      const next = !isWebcamAiActive;
+                      setIsWebcamAiActive(next);
+                      showToast(next ? 'Đã bật luồng Webcam AI tự động nhận diện tư thế!' : 'Đã dừng Webcam AI (Bảo vệ quyền riêng tư cá nhân)');
+                    }}
+                    className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all ${
+                      isWebcamAiActive
+                        ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
+                    }`}
+                  >
+                    {isWebcamAiActive ? (
+                      <>
+                        <VideoOff className="w-4 h-4 text-rose-600" />
+                        <span>Tạm Dừng Webcam AI</span>
+                      </>
+                    ) : (
+                      <>
+                        <Video className="w-4 h-4 text-white" />
+                        <span>Bật Webcam AI Tự Động</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Box 3: Nhiệm Vụ Hôm Nay Tinh Gọn */}
               <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-2.5 text-xs">
                 <div className="flex items-center justify-between font-bold text-slate-900 pb-1.5 border-b border-slate-100">
                   <span>Nhiệm Vụ Trong Lịch Trình</span>
@@ -794,6 +1026,7 @@ export default function PersonalView({
             <div className="lg:col-span-8 space-y-2.5">
               {timetable.map((task) => {
                 const isCurrent = task.status === 'in_progress';
+                const isPaused = task.status === 'paused';
                 const isDone = task.status === 'completed';
 
                 return (
@@ -802,6 +1035,8 @@ export default function PersonalView({
                     className={`p-3.5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
                       isCurrent
                         ? 'bg-emerald-50/80 border-emerald-500 shadow-sm ring-1 ring-emerald-500/30'
+                        : isPaused
+                        ? 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-300/40'
                         : isDone
                         ? 'bg-slate-50 border-slate-200 opacity-80'
                         : 'bg-white border-slate-200 hover:border-slate-300'
@@ -809,7 +1044,13 @@ export default function PersonalView({
                   >
                     <div className="flex items-start gap-3">
                       <div className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${
-                        isCurrent ? 'bg-emerald-600 text-white shadow-xs' : isDone ? 'bg-slate-200 text-slate-600' : 'bg-slate-100 text-slate-500'
+                        isCurrent
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : isPaused
+                          ? 'bg-amber-500 text-white shadow-xs'
+                          : isDone
+                          ? 'bg-slate-200 text-slate-600'
+                          : 'bg-slate-100 text-slate-500'
                       }`}>
                         <Clock className="w-4 h-4" />
                       </div>
@@ -820,6 +1061,12 @@ export default function PersonalView({
                           {isCurrent && (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white animate-pulse">
                               ĐANG THỰC HIỆN
+                            </span>
+                          )}
+                          {isPaused && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
+                              <Pause className="w-2.5 h-2.5" />
+                              ĐANG TẠM DỪNG
                             </span>
                           )}
                           {isDone && (
@@ -903,7 +1150,11 @@ export default function PersonalView({
                     </span>
                   </div>
                   <button
-                    onClick={() => setIsPomodoroRunning(!isPomodoroRunning)}
+                    onClick={() => {
+                      const next = !isPomodoroRunning;
+                      setIsPomodoroRunning(next);
+                      showToast(next ? 'Đã bắt đầu hiệp tập trung Pomodoro 25 phút!' : 'Đã tạm dừng đồng hồ Pomodoro.');
+                    }}
                     className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold shadow-xs transition-all flex items-center justify-center gap-1.5"
                   >
                     {isPomodoroRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -934,6 +1185,14 @@ export default function PersonalView({
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleTriggerAiScheduleReminder}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors shadow-2xs cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Mô Phỏng: AI Nhắc Đến Lịch Trình</span>
+              </button>
+
               <button
                 onClick={handleSimulateDistraction}
                 className="px-3.5 py-1.5 rounded-xl font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors"
@@ -972,35 +1231,228 @@ export default function PersonalView({
                   </span>
                 </div>
 
-                <div className="p-3.5 bg-white/95 rounded-xl border border-emerald-100 space-y-2">
+                <div className={`p-3.5 rounded-xl border space-y-2 transition-all ${
+                  nextTaskReminder.status === 'in_progress'
+                    ? 'bg-emerald-50/70 border-emerald-400 shadow-sm ring-1 ring-emerald-500/30'
+                    : nextTaskReminder.status === 'paused'
+                    ? 'bg-amber-50/70 border-amber-300 shadow-xs ring-1 ring-amber-400/30'
+                    : nextTaskReminder.status === 'completed'
+                    ? 'bg-slate-50 border-slate-200'
+                    : 'bg-white/95 border-emerald-100'
+                }`}>
                   <div className="flex items-center justify-between">
                     <span className="font-mono font-bold text-emerald-700 text-xs">{nextTaskReminder.time}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                      Sắp diễn ra
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold transition-all ${
+                      nextTaskReminder.status === 'in_progress'
+                        ? 'bg-emerald-600 text-white animate-pulse flex items-center gap-1 shadow-2xs'
+                        : nextTaskReminder.status === 'paused'
+                        ? 'bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1 shadow-2xs'
+                        : nextTaskReminder.status === 'completed'
+                        ? 'bg-slate-200 text-slate-700'
+                        : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {nextTaskReminder.status === 'in_progress' ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                          <span>Đang thực hiện</span>
+                        </>
+                      ) : nextTaskReminder.status === 'paused' ? (
+                        <>
+                          <Pause className="w-2.5 h-2.5 text-amber-600" />
+                          <span>Đang tạm dừng</span>
+                        </>
+                      ) : nextTaskReminder.status === 'completed' ? (
+                        '✓ Đã hoàn thành'
+                      ) : (
+                        'Sắp diễn ra'
+                      )}
                     </span>
                   </div>
                   <div className="font-bold text-slate-900 text-sm">{nextTaskReminder.title}</div>
-                  <p className="text-slate-600 text-[11px]">
-                    Đã hoàn thành 85% task hiện tại. Khi hết giờ, hãy mở ngay ứng dụng <strong className="text-emerald-700 font-mono">{nextTaskReminder.app}</strong> để tiếp tục chuỗi tập trung!
-                  </p>
 
-                  <button
-                    onClick={() => {
-                      showToast(`Đã chuyển trạng thái sang nhiệm vụ: "${nextTaskReminder.title}"`);
-                      setActiveTask({
-                        id: 'TT-NEXT',
-                        time: nextTaskReminder.time,
-                        title: nextTaskReminder.title,
-                        targetApp: nextTaskReminder.app,
-                        note: 'Bắt đầu theo lịch nhắc nhở AI',
-                        status: 'in_progress'
-                      });
-                    }}
-                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all mt-1"
-                  >
-                    <span>Bắt Đầu Nhiệm Vụ Này Ngay</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  {nextTaskReminder.status === 'in_progress' ? (
+                    <div className="p-2.5 bg-emerald-100/60 rounded-xl border border-emerald-200 space-y-1">
+                      <div className="text-[11px] text-emerald-900 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                        <span>Đang đếm ngược Pomodoro 25 phút & bật AI giám sát tư thế ngồi.</span>
+                      </div>
+                      <div className="text-[11px] text-slate-600">
+                        Ứng dụng hoạt động: <span className="font-mono font-bold text-emerald-800">{nextTaskReminder.app}</span>
+                      </div>
+                    </div>
+                  ) : nextTaskReminder.status === 'paused' ? (
+                    <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 space-y-1">
+                      <div className="text-[11px] text-amber-900 font-semibold flex items-center gap-1.5">
+                        <Pause className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>Phiên làm việc đang tạm dừng. Đồng hồ Pomodoro đã được giữ nguyên.</span>
+                      </div>
+                      <div className="text-[11px] text-slate-600">
+                        Ứng dụng: <span className="font-mono font-bold text-amber-800">{nextTaskReminder.app}</span> • Bấm <strong>Tiếp Tục</strong> để làm tiếp tục.
+                      </div>
+                    </div>
+                  ) : nextTaskReminder.status === 'completed' ? (
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Đã hoàn thành xong nhiệm vụ này! Lịch trình tiếp theo đang sẵn sàng.</span>
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 text-[11px]">
+                      Đã hoàn thành 85% task hiện tại. Khi hết giờ, hãy mở ngay ứng dụng <strong className="text-emerald-700 font-mono">{nextTaskReminder.app}</strong> để tiếp tục chuỗi tập trung!
+                    </p>
+                  )}
+
+                  {nextTaskReminder.status === 'upcoming' && (
+                    <button
+                      onClick={() => {
+                        setNextTaskReminder(prev => ({ ...prev, status: 'in_progress' }));
+                        setTimetable(prev => prev.map(t => {
+                          if (t.id === nextTaskReminder.id || t.title === nextTaskReminder.title) {
+                            return { ...t, status: 'in_progress' };
+                          }
+                          if (t.status === 'in_progress') {
+                            return { ...t, status: 'completed' };
+                          }
+                          return t;
+                        }));
+                        setActiveTask({
+                          id: nextTaskReminder.id || 'TT-NEXT',
+                          time: nextTaskReminder.time,
+                          title: nextTaskReminder.title,
+                          targetApp: nextTaskReminder.app,
+                          note: 'Bắt đầu theo lịch nhắc nhở AI',
+                          status: 'in_progress'
+                        });
+                        setIsPomodoroRunning(true);
+                        setIsWebcamAiActive(true);
+                        showToast(`✓ Đã bắt đầu: "${nextTaskReminder.title}" (Đang đếm ngược Pomodoro)`);
+                      }}
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all mt-1 cursor-pointer"
+                    >
+                      <span>Bắt Đầu Nhiệm Vụ Này Ngay</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {nextTaskReminder.status === 'in_progress' && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => {
+                          setNextTaskReminder(prev => ({ ...prev, status: 'completed' }));
+                          setTimetable(prev => prev.map(t => {
+                            if (t.id === nextTaskReminder.id || t.title === nextTaskReminder.title) {
+                              return { ...t, status: 'completed' };
+                            }
+                            return t;
+                          }));
+                          showToast(`✓ Chúc mừng! Đã hoàn thành nhiệm vụ "${nextTaskReminder.title}"`);
+                        }}
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer text-xs"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Đánh Dấu Hoàn Thành</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setNextTaskReminder(prev => ({ ...prev, status: 'paused' }));
+                          setTimetable(prev => prev.map(t => {
+                            if (t.id === nextTaskReminder.id || t.title === nextTaskReminder.title) {
+                              return { ...t, status: 'paused' };
+                            }
+                            return t;
+                          }));
+                          setIsPomodoroRunning(false);
+                          showToast(`⏸ Đã tạm dừng nhiệm vụ. Nhấn [Tiếp Tục] để tiếp tục làm việc.`);
+                        }}
+                        className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl font-bold text-xs transition-colors border border-amber-200 cursor-pointer flex items-center gap-1"
+                      >
+                        <Pause className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Tạm Dừng</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {nextTaskReminder.status === 'paused' && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => {
+                          setNextTaskReminder(prev => ({ ...prev, status: 'in_progress' }));
+                          setTimetable(prev => prev.map(t => {
+                            if (t.id === nextTaskReminder.id || t.title === nextTaskReminder.title) {
+                              return { ...t, status: 'in_progress' };
+                            }
+                            return t;
+                          }));
+                          setIsPomodoroRunning(true);
+                          setIsWebcamAiActive(true);
+                          showToast(`▶ Đã tiếp tục thực hiện: "${nextTaskReminder.title}"`);
+                        }}
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer text-xs"
+                      >
+                        <Play className="w-4 h-4" />
+                        <span>Tiếp Tục Nhiệm Vụ</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setNextTaskReminder(prev => ({ ...prev, status: 'completed' }));
+                          setTimetable(prev => prev.map(t => {
+                            if (t.id === nextTaskReminder.id || t.title === nextTaskReminder.title) {
+                              return { ...t, status: 'completed' };
+                            }
+                            return t;
+                          }));
+                          showToast(`✓ Đã hoàn thành nhiệm vụ "${nextTaskReminder.title}"`);
+                        }}
+                        className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors border border-slate-200 cursor-pointer flex items-center gap-1"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Xong</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setNextTaskReminder(prev => ({ ...prev, status: 'upcoming' }));
+                          setTimetable(prev => prev.map(t => {
+                            if (t.id === nextTaskReminder.id || t.title === nextTaskReminder.title) {
+                              return { ...t, status: 'upcoming' };
+                            }
+                            return t;
+                          }));
+                          showToast('Đã đặt lại về trạng thái chờ ban đầu');
+                        }}
+                        className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-500"
+                        title="Bắt đầu lại từ đầu"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  {nextTaskReminder.status === 'completed' && (
+                    <button
+                      onClick={() => {
+                        const upcoming = timetable.find(t => t.status === 'upcoming' && t.id !== nextTaskReminder.id);
+                        if (upcoming) {
+                          setNextTaskReminder({
+                            id: upcoming.id,
+                            title: upcoming.title,
+                            time: upcoming.time,
+                            app: upcoming.targetApp,
+                            status: 'upcoming'
+                          });
+                          showToast(`Đã chuyển sang nhiệm vụ kế tiếp: "${upcoming.title}"`);
+                        } else {
+                          setNextTaskReminder(prev => ({ ...prev, status: 'upcoming' }));
+                          showToast('Đã làm mới lại trạng thái nhiệm vụ');
+                        }
+                      }}
+                      className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold shadow-2xs flex items-center justify-center gap-1.5 transition-all mt-1 cursor-pointer text-xs border border-slate-200"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Chuyển Sang Nhiệm Vụ Tiếp Theo</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1076,6 +1528,67 @@ export default function PersonalView({
                     Giữ mắt cách màn hình 50-60cm, nâng ghế sao cho góc gập khuỷu tay và đầu gối đạt xấp xỉ 90° để giảm 70% tải trọng lên thắt lưng.
                   </p>
                 </div>
+              </div>
+
+              {/* Box Cài Đặt Trợ Lý AI Nhắc Lịch Trình Tự Động */}
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 text-xs">
+                <div className="font-bold text-slate-900 pb-2 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Brain className="w-4 h-4 text-emerald-600" />
+                    <span>Trợ Lý AI Nhắc Lịch Trình</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {isAutoScheduleReminder ? 'Tự Động Bật' : 'Đã Tắt'}
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl">
+                    <div>
+                      <div className="font-semibold text-slate-800 text-[11px]">Tự động nhắc khi đến giờ hẹn:</div>
+                      <div className="text-[10px] text-slate-500">Bật popup nhắc nhở khi đến khung giờ</div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const next = !isAutoScheduleReminder;
+                        setIsAutoScheduleReminder(next);
+                        showToast(next ? 'Đã bật tự động nhắc lịch trình' : 'Đã tắt tự động nhắc lịch trình');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-colors cursor-pointer ${
+                        isAutoScheduleReminder ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {isAutoScheduleReminder ? 'Đang Bật' : 'Đang Tắt'}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl">
+                    <div>
+                      <div className="font-semibold text-slate-800 text-[11px]">Âm thanh thông báo AI:</div>
+                      <div className="text-[10px] text-slate-500">Phát âm thanh chuông khi có việc cần làm</div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const next = !soundReminder;
+                        setSoundReminder(next);
+                        showToast(next ? 'Đã bật âm thanh nhắc nhở' : 'Đã tắt âm thanh nhắc nhở');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-colors cursor-pointer ${
+                        soundReminder ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {soundReminder ? 'Bật Chuông' : 'Tắt Chuông'}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleTriggerAiScheduleReminder}
+                  className="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all text-xs cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>Kích Hoạt Thử Lời Nhắc Của Trợ Lý AI</span>
+                </button>
               </div>
             </div>
 
@@ -1939,12 +2452,13 @@ export default function PersonalView({
             name: 'Bàn Làm Việc Cá Nhân',
             assignedTo: 'Nguyễn Văn Cường',
             location: 'Home Office - Bàn Làm Việc',
-            webcamUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+            webcamUrl: '/webcam/personal_desk_webcam_pov.jpg',
             ip: '192.168.1.55',
             activeProcess: 'code.exe - VS Code Frontend Core',
             currentPosture: 'good',
             inputTelemetry: personalWorkstation.inputTelemetry
           }}
+          isPersonal={true}
           member={{
             name: 'Nguyễn Văn Cường',
             role: 'Kỹ sư phần mềm (Cá nhân)',
@@ -1958,6 +2472,20 @@ export default function PersonalView({
           }}
         />
       )}
+
+      {/* Nút Trợ Lý AI Nổi Thường Trực Góc Dưới */}
+      <div 
+        onClick={handleTriggerAiScheduleReminder}
+        className="fixed bottom-6 left-6 z-40 hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-emerald-300 shadow-lg text-xs font-semibold text-slate-800 cursor-pointer hover:shadow-xl hover:scale-105 hover:border-emerald-400 transition-all group"
+        title="Bấm để Trợ lý AI nhắc nhở lịch trình"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <Brain className="w-4 h-4 text-emerald-600 group-hover:rotate-12 transition-transform" />
+        <span className="text-slate-700">Trợ Lý AI: <span className="text-emerald-700 font-bold">Theo dõi lịch trình</span> ({nextTaskReminder.time})</span>
+      </div>
 
     </div>
   );

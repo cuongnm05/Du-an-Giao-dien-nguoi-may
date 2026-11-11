@@ -185,13 +185,6 @@ export default function MultiCameraView({
               12 Cam
             </button>
             <button
-              onClick={() => { setLayoutMode('gridAll'); setCurrentPage(1); }}
-              className={`px-2.5 py-1 rounded-lg font-semibold ${layoutMode === 'gridAll' || layoutMode === 'grid32' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'}`}
-              title="Xem tất cả Camera không phân trang"
-            >
-              Xem Tất Cả Cam
-            </button>
-            <button
               onClick={() => setLayoutMode('focus')}
               className={`px-2.5 py-1 rounded-lg font-semibold ${layoutMode === 'focus' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'}`}
               title="Tiêu điểm 1 Cam"
@@ -202,7 +195,12 @@ export default function MultiCameraView({
 
           {/* Nút Tuần Tra Tự Động & Nhắc Toàn Phòng */}
           <button
-            onClick={() => setIsPatrolling(!isPatrolling)}
+            onClick={() => {
+              const next = !isPatrolling;
+              setIsPatrolling(next);
+              setBroadcastNotice(next ? 'Đã bật chế độ tự động tuần tra quét qua các máy trạm!' : 'Đã dừng tuần tra tự động.');
+              setTimeout(() => setBroadcastNotice(null), 3500);
+            }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold transition-all border ${
               isPatrolling
                 ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
@@ -262,12 +260,10 @@ export default function MultiCameraView({
       ) : (
         /* Grid Layout: 6, 12, hoặc Toàn bộ Cam hiển thị hình ảnh chuẩn xác */
         <div className="space-y-4">
-          <div className={`grid gap-3 ${
-            layoutMode === 'gridAll' || layoutMode === 'grid32'
-              ? 'grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'
-              : layoutMode === 'grid12'
-              ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+          <div className={`grid gap-4 ${
+            layoutMode === 'grid6'
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
           }`}>
             {paginatedFeeds.map(cam => {
               const posture = cam.member.currentPosture;
@@ -284,7 +280,7 @@ export default function MultiCameraView({
                   }`}
                 >
                   {/* Viewport Camera Feed với hình ảnh thật & OSD Vị trí + Thời gian thực */}
-                  <div className={`relative w-full ${layoutMode === 'gridAll' || layoutMode === 'grid32' ? 'h-28' : 'h-44 sm:h-48'} bg-slate-900 overflow-hidden`}>
+                  <div className={`relative w-full ${layoutMode === 'grid6' ? 'h-44 sm:h-48' : 'h-36 sm:h-40'} bg-slate-900 overflow-hidden`}>
                     
                     {posture === 'away' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 font-mono text-[10px] gap-1 bg-slate-950">
@@ -300,23 +296,23 @@ export default function MultiCameraView({
                     )}
 
                     {/* CCTV OSD Overlay */}
-                    <div className="absolute top-2 left-2 flex flex-col gap-0.5 pointer-events-none">
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-white font-mono text-[9px]">
+                    <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none max-w-[55%]">
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/75 backdrop-blur-md text-white font-mono text-[10px] w-fit">
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
                         <span>{cam.id}</span>
                       </div>
-                      <span className="px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-emerald-300 font-mono text-[8px] truncate max-w-[130px]">
+                      <span className="px-2 py-1 rounded-md bg-black/75 backdrop-blur-md text-emerald-300 font-mono text-[10px] truncate">
                         📍 {cam.location}
                       </span>
                     </div>
 
                     {/* Clock & Status OSD Right */}
-                    <div className="absolute top-2 right-2 flex flex-col items-end gap-1 pointer-events-none">
-                      <span className="px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-amber-300 font-mono text-[9px]">
+                    <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5 pointer-events-none">
+                      <span className="px-2 py-1 rounded-md bg-black/75 backdrop-blur-md text-amber-300 font-mono text-[10px]">
                         {liveClock}
                       </span>
                       
-                      <span className={`px-1.5 py-0.5 rounded font-mono text-[8px] font-bold backdrop-blur-md ${
+                      <span className={`px-2 py-1 rounded-md font-mono text-[9px] font-bold backdrop-blur-md ${
                         posture === 'good'
                           ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-400/30'
                           : posture === 'phone'
@@ -344,17 +340,17 @@ export default function MultiCameraView({
                   </div>
 
                   {/* Bottom bar: Hiển thị trạng thái cả 3 luồng: Cam ngoài, Cam màn hình, Bàn phím & Chuột */}
-                  <div className="p-2 bg-white flex items-center justify-between text-xs">
-                    <div className="min-w-0 flex-1 pr-2">
+                  <div className="p-3 bg-white flex items-center justify-between gap-2 text-xs">
+                    <div className="min-w-0 flex-1 space-y-0.5">
                       <div className="font-bold text-slate-900 truncate">{cam.assignedTo}</div>
                       <div className="text-[10px] text-slate-500 font-mono truncate">
                         🖥️ {cam.activeProcess}
                       </div>
-                      <div className="text-[9px] text-slate-500 flex items-center gap-1.5 mt-0.5 truncate">
-                        <span className="text-purple-700 bg-purple-50 font-bold px-1 rounded font-mono">
+                      <div className="text-[10px] text-slate-500 flex items-center gap-2 pt-0.5 truncate">
+                        <span className="text-purple-700 bg-purple-50 font-bold px-1.5 py-0.5 rounded font-mono">
                           ⌨️ {cam.inputTelemetry?.wpm || 52} WPM
                         </span>
-                        <span className="text-blue-700 bg-blue-50 px-1 rounded font-mono">
+                        <span className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-mono">
                           🖱️ {cam.inputTelemetry?.mouseCpm || 24} CPM
                         </span>
                       </div>
@@ -365,7 +361,7 @@ export default function MultiCameraView({
                         e.stopPropagation();
                         onSendBuzzer(cam.member);
                       }}
-                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 shrink-0"
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 shrink-0 transition-colors"
                       title="Nhắc nhở máy này"
                     >
                       <Bell className="w-3.5 h-3.5" />

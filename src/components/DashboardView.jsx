@@ -139,7 +139,12 @@ export default function DashboardView({
         <div className="flex items-center gap-2">
           {/* Nút Tuần Tra Tự Động */}
           <button
-            onClick={() => setIsPatrolling(!isPatrolling)}
+            onClick={() => {
+              const next = !isPatrolling;
+              setIsPatrolling(next);
+              setNotificationToast(next ? 'Đã bật chế độ tuần tra tự động qua các máy trạm!' : 'Đã dừng tuần tra tự động.');
+              setTimeout(() => setNotificationToast(null), 3500);
+            }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
               isPatrolling
                 ? 'bg-amber-500 text-white border-amber-500 shadow-sm animate-pulse'

@@ -39,8 +39,11 @@ export default function WorkstationInspectorModal({
   cam, 
   member, 
   onClose, 
-  onSendBuzzer 
+  onSendBuzzer,
+  isPersonal = false
 }) {
+  const isPersonalWorkstation = isPersonal || cam?.id === 'PC-PERSONAL-01' || cam?.id === 'MY-DESK-01';
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'webcam' | 'screen' | 'input'
   const [isRecording, setIsRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
@@ -196,7 +199,9 @@ export default function WorkstationInspectorModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${
+      isFullScreen ? 'p-0' : 'p-2 sm:p-4 md:p-6'
+    }`}>
       
       {/* Toast Inside Modal */}
       {modalToast && (
@@ -207,68 +212,87 @@ export default function WorkstationInspectorModal({
       )}
 
       {/* Main Modal Card */}
-      <div className="relative w-full max-w-6xl max-h-[95vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden text-slate-800">
+      <div className={`relative w-full bg-white shadow-2xl flex flex-col overflow-hidden text-slate-800 transition-all duration-200 ${
+        isFullScreen 
+          ? 'w-screen h-screen max-w-none max-h-none rounded-none border-none' 
+          : 'max-w-[97vw] xl:max-w-[1650px] 2xl:max-w-[1800px] h-[96vh] rounded-3xl border border-slate-200'
+      }`}>
         
         {/* Top Header Bar */}
-        <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+        <div className="px-5 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex items-center justify-between border-b border-emerald-700/30 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+            <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center text-white">
               <Camera className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-mono font-bold text-sm text-white">{cam.id}</span>
-                <span className="text-slate-400">•</span>
-                <span className="font-bold text-sm text-slate-100">{cam.name || cam.assignedTo}</span>
-                <span className="text-slate-400">•</span>
-                <span className="text-xs text-slate-300">{cam.location}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  LIVE 30 FPS
+                <span className="text-emerald-200">•</span>
+                <span className="font-bold text-sm text-white">{cam.assignedTo || cam.name}</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white border border-white/30 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                  LIVE
                 </span>
               </div>
-              <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5 font-mono">
-                <span>IP: {cam.ip || '192.168.1.101'}</span>
-                <span>•</span>
-                <span>OS: Windows 11 Pro Enterprise</span>
-                <span>•</span>
-                <span className="text-amber-300">{liveClock}</span>
+              <div className="text-[11px] text-emerald-50/90 flex items-center gap-2 mt-0.5">
+                <span>{cam.location}</span>
+                <span className="text-emerald-200">•</span>
+                <span className="font-mono font-semibold text-white">{liveClock}</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* View stream selector buttons */}
-            <div className="hidden md:flex items-center bg-slate-800 p-1 rounded-xl text-xs font-semibold text-slate-300 border border-slate-700">
+            <div className="hidden md:flex items-center bg-emerald-800/40 p-1 rounded-xl text-xs font-semibold text-emerald-50 border border-white/20">
               <button
                 onClick={() => setActiveTab('all')}
-                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'all' ? 'bg-emerald-600 text-white' : 'hover:text-white'}`}
+                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'all' ? 'bg-white text-emerald-700 font-bold shadow-xs' : 'hover:text-white hover:bg-white/10'}`}
               >
                 3 Luồng Toàn Diện
               </button>
               <button
                 onClick={() => setActiveTab('webcam')}
-                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'webcam' ? 'bg-emerald-600 text-white' : 'hover:text-white'}`}
+                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'webcam' ? 'bg-white text-emerald-700 font-bold shadow-xs' : 'hover:text-white hover:bg-white/10'}`}
               >
                 Cam Ngoài AI
               </button>
               <button
                 onClick={() => setActiveTab('screen')}
-                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'screen' ? 'bg-emerald-600 text-white' : 'hover:text-white'}`}
+                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'screen' ? 'bg-white text-emerald-700 font-bold shadow-xs' : 'hover:text-white hover:bg-white/10'}`}
               >
                 Màn Hình Desktop
               </button>
               <button
                 onClick={() => setActiveTab('input')}
-                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'input' ? 'bg-emerald-600 text-white' : 'hover:text-white'}`}
+                className={`px-3 py-1 rounded-lg transition-all ${activeTab === 'input' ? 'bg-white text-emerald-700 font-bold shadow-xs' : 'hover:text-white hover:bg-white/10'}`}
               >
                 Phím & Chuột
               </button>
             </div>
 
+            {/* Toggle Full-Screen Button */}
+            <button
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-2xs"
+              title={isFullScreen ? "Thu nhỏ cửa sổ" : "Phóng to toàn màn hình"}
+            >
+              {isFullScreen ? (
+                <>
+                  <Minimize2 className="w-4 h-4 text-emerald-200" />
+                  <span className="hidden sm:inline">Thu Nhỏ</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="w-4 h-4 text-emerald-200" />
+                  <span className="hidden sm:inline">Toàn Màn Hình</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl bg-white/15 hover:bg-rose-500 text-white border border-white/20 transition-colors cursor-pointer"
               title="Đóng cửa sổ"
             >
               <X className="w-5 h-5" />
@@ -306,19 +330,21 @@ export default function WorkstationInspectorModal({
 
             {/* Quick Action Reminders in Banner */}
             <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleTriggerBuzzer}
-                className="flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95"
-              >
-                <Bell className="w-4 h-4" />
-                <span>Rung Chuông Nhắc Nhở</span>
-              </button>
+              {!isPersonalWorkstation && (
+                <button
+                  onClick={handleTriggerBuzzer}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+                >
+                  <Bell className="w-4 h-4" />
+                  <span>Rung Chuông Nhắc Nhở</span>
+                </button>
+              )}
               <button
                 onClick={handleSendPostureTip}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-semibold border border-slate-300 transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-semibold border border-slate-300 transition-all cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span>Gửi Bài Tập Giãn Cơ</span>
+                <span>{isPersonalWorkstation ? 'Bài Tập Giãn Cơ (5 Phút)' : 'Gửi Bài Tập Giãn Cơ'}</span>
               </button>
             </div>
           </div>
@@ -583,7 +609,11 @@ export default function WorkstationInspectorModal({
                 <div className="text-xs text-slate-500 mt-0.5">Độ ồn môi trường: 42 dB</div>
               </div>
               <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  showToast(next ? 'Đã bật mic & âm thanh môi trường tại máy trạm' : 'Đã tắt mic máy trạm');
+                }}
                 className={`p-2 rounded-xl border ${soundEnabled ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-100 border-slate-200 text-slate-500'}`}
               >
                 <Volume2 className="w-4 h-4" />
@@ -601,17 +631,19 @@ export default function WorkstationInspectorModal({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleTriggerBuzzer}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-            >
-              <Bell className="w-4 h-4" />
-              <span>Phát Chuông Cảnh Báo</span>
-            </button>
+            {!isPersonalWorkstation && (
+              <button
+                onClick={handleTriggerBuzzer}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Bell className="w-4 h-4" />
+                <span>Phát Chuông Cảnh Báo</span>
+              </button>
+            )}
 
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
+              className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Đóng Cửa Sổ
             </button>

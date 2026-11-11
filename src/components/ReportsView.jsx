@@ -15,7 +15,9 @@ import {
   Filter,
   Search,
   UserCheck,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { ANNUAL_REPORT_METRICS, HOURLY_METRICS } from '../data/mockData';
 
@@ -23,6 +25,8 @@ export default function ReportsView({ members = [] }) {
   const [dateRange, setDateRange] = useState('year'); // 'day' | 'week' | 'month' | 'year'
   const [selectedDept, setSelectedDept] = useState('ALL');
   const [searchEmployee, setSearchEmployee] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
   const [isExporting, setIsExporting] = useState(false);
   const [exportNotice, setExportNotice] = useState(false);
 
@@ -34,6 +38,9 @@ export default function ReportsView({ members = [] }) {
     const matchesDept = selectedDept === 'ALL' || m.department === selectedDept;
     return matchesSearch && matchesDept;
   });
+
+  const totalPages = Math.ceil(filteredMembers.length / pageSize) || 1;
+  const paginatedMembers = filteredMembers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExport = () => {
     setIsExporting(true);
@@ -240,29 +247,41 @@ export default function ReportsView({ members = [] }) {
         </div>
       </div>
 
-      {/* Bảng Báo Cáo Chi Tiết Từng Nhân Viên */}
+      {/* Bảng Báo Cáo Chi Tiết Từng Nhân Viên (Dạng Bảng Table Có Chỉ Số & Phân Trang Gọn Gàng) */}
       <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Chi Tiết Báo Cáo ({filteredMembers.length} Nhân Viên)
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1 border-b border-slate-100">
+          <div>
+            <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <span>Bảng Chỉ Số Báo Cáo Nhân Sự ({filteredMembers.length} Nhân Viên)</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            </div>
+            <div className="text-[11px] text-slate-500">
+              Tổng hợp thời gian làm việc, điểm công thái học & xếp loại sức khỏe cột sống
+            </div>
+          </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative w-48">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-44 sm:w-52">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
               <input
                 type="text"
                 value={searchEmployee}
-                onChange={(e) => setSearchEmployee(e.target.value)}
-                placeholder="Tìm nhân viên..."
-                className="w-full pl-7 pr-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                onChange={(e) => {
+                  setSearchEmployee(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Tìm tên, mã nhân viên..."
+                className="w-full pl-7 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
               />
             </div>
 
             <select
               value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+              onChange={(e) => {
+                setSelectedDept(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:bg-white focus:outline-none focus:border-emerald-500"
             >
               {departments.map(d => (
                 <option key={d} value={d}>{d === 'ALL' ? 'Tất cả phòng ban' : d}</option>
@@ -271,48 +290,156 @@ export default function ReportsView({ members = [] }) {
           </div>
         </div>
 
-        {/* Bảng cuộn danh sách */}
+        {/* Bảng Table Chỉ Số Chuẩn Nghiệp Vụ */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500 text-[11px]">
-                <th className="py-2.5 font-semibold">Nhân viên</th>
-                <th className="py-2.5 font-semibold">Phòng ban</th>
-                <th className="py-2.5 font-semibold">Mã máy trạm</th>
-                <th className="py-2.5 font-semibold text-center">Thời gian làm việc</th>
-                <th className="py-2.5 font-semibold text-center">Điểm tư thế</th>
-                <th className="py-2.5 font-semibold">Đánh giá cột sống</th>
-                <th className="py-2.5 font-semibold">Xếp hạng thưởng</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold text-[11px] uppercase tracking-wider">
+                <th className="py-2.5 px-3">Nhân Viên & Mã Số</th>
+                <th className="py-2.5 px-3">Chức Danh & Phòng Ban</th>
+                <th className="py-2.5 px-3 text-center">Thời Gian Làm Việc</th>
+                <th className="py-2.5 px-3">Điểm Công Thái Học</th>
+                <th className="py-2.5 px-3 text-center">Sức Khỏe Cột Sống</th>
+                <th className="py-2.5 px-3 text-center">Cảnh Báo Gù</th>
+                <th className="py-2.5 px-3 text-right">Xếp Hạng & Thưởng</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredMembers.map((mem) => (
-                <tr key={mem.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-2.5 font-bold text-slate-900 flex items-center gap-2">
-                    <img src={mem.avatar} alt={mem.name} className="w-7 h-7 rounded-full object-cover" />
-                    <span>{mem.name}</span>
-                  </td>
-                  <td className="py-2.5 text-slate-600">{mem.department}</td>
-                  <td className="py-2.5 font-mono text-emerald-600 font-semibold">{mem.camId}</td>
-                  <td className="py-2.5 text-center font-mono text-slate-800 font-bold">
-                    {getMemberHours(mem)}
-                  </td>
-                  <td className="py-2.5 text-center font-mono font-bold text-emerald-700">
-                    {mem.ergonomicsScore} / 100
-                  </td>
-                  <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      {mem.spineHealthStatus || 'Tốt'}
-                    </span>
-                  </td>
-                  <td className="py-2.5 font-semibold text-emerald-700">
-                    {mem.estimatedBonus}
-                  </td>
-                </tr>
-              ))}
+              {paginatedMembers.map((mem) => {
+                const score = mem.ergonomicsScore;
+                const isWarning = mem.spineHealthStatus === 'Cần cải thiện';
+
+                return (
+                  <tr key={mem.id} className="hover:bg-emerald-50/40 transition-colors group">
+                    {/* Cột 1: Nhân viên & Mã NV */}
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-2.5">
+                        <img src={mem.avatar} alt={mem.name} className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-200 shrink-0" />
+                        <div>
+                          <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                            {mem.name}
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            {mem.code} • {mem.camId}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Cột 2: Phòng ban & Chức danh */}
+                    <td className="py-2.5 px-3">
+                      <div className="font-semibold text-slate-800">{mem.role || 'Chuyên viên'}</div>
+                      <div className="text-[10px] text-slate-500 truncate max-w-[150px]">{mem.department}</div>
+                    </td>
+
+                    {/* Cột 3: Thời gian làm việc */}
+                    <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                      <div className="text-emerald-700 font-bold">{getMemberHours(mem)}</div>
+                      <div className="text-[9px] text-slate-400 font-normal">
+                        {dateRange === 'day' ? 'Ca hôm nay' : dateRange === 'week' ? 'Trong tuần' : dateRange === 'month' ? 'Trong tháng' : 'Cả năm'}
+                      </div>
+                    </td>
+
+                    {/* Cột 4: Điểm Công Thái Học với Progress Bar Mini */}
+                    <td className="py-2.5 px-3">
+                      <div className="space-y-1 min-w-[100px]">
+                        <div className="flex items-center justify-between font-mono font-bold text-xs">
+                          <span className={score >= 85 ? 'text-emerald-700' : score >= 75 ? 'text-amber-700' : 'text-rose-700'}>
+                            {score} / 100
+                          </span>
+                          <span className="text-[9px] text-slate-400">ISO</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className={`h-1.5 rounded-full ${
+                              score >= 85 ? 'bg-emerald-500' : score >= 75 ? 'bg-amber-500' : 'bg-rose-500'
+                            }`}
+                            style={{ width: `${score}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Cột 5: Đánh giá cột sống */}
+                    <td className="py-2.5 px-3 text-center">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        mem.spineHealthStatus === 'Xuất sắc'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : mem.spineHealthStatus === 'Tốt'
+                          ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isWarning ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+                        <span>{mem.spineHealthStatus || 'Tốt'}</span>
+                      </span>
+                    </td>
+
+                    {/* Cột 6: Cảnh báo gù */}
+                    <td className="py-2.5 px-3 text-center">
+                      {mem.warningsToday > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 font-bold font-mono text-[10px] border border-rose-200">
+                          <AlertTriangle className="w-3 h-3 text-rose-500" />
+                          <span>{mem.warningsToday} lần</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-[10px]">0 lần</span>
+                      )}
+                    </td>
+
+                    {/* Cột 7: Xếp hạng thưởng */}
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="font-semibold text-slate-900 text-[11px]">{mem.salaryBonusGrade || 'Hạng A+'}</div>
+                      <div className="text-[10px] font-mono text-emerald-600 font-bold">{mem.estimatedBonus}</div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+
+        {/* Thanh Phân Trang Gọn Gàng (Không bị kéo dài màn hình) */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2.5 border-t border-slate-100 text-xs">
+            <span className="text-slate-500">
+              Hiển thị <strong>{(currentPage - 1) * pageSize + 1}</strong> - <strong>{Math.min(currentPage * pageSize, filteredMembers.length)}</strong> trên tổng số <strong>{filteredMembers.length}</strong> nhân viên
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40 transition-colors"
+                title="Trang trước"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-7 h-7 rounded-lg font-mono font-bold text-xs transition-colors ${
+                    currentPage === page
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'hover:bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40 transition-colors"
+                title="Trang tiếp"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
 

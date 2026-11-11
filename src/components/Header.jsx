@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Camera, 
   Activity, 
   Bell, 
   Building2, 
   User, 
-  Cpu, 
   ShieldCheck, 
   Sparkles, 
   CheckCircle2, 
@@ -32,12 +31,28 @@ export default function Header({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [unreadAlerts, setUnreadAlerts] = useState(alerts);
+  const notificationRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date().toLocaleTimeString('vi-VN'));
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Click outside to close notification panel & user dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setShowUserDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const unreadCount = unreadAlerts.filter(a => !a.resolved).length;
@@ -77,14 +92,6 @@ export default function Header({
 
         {/* Right Action Bar */}
         <div className="flex items-center gap-2 sm:gap-3">
-          
-          {/* AI Engine Status Badge */}
-          <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-mono font-medium">
-            <Cpu className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-            <span>AI AGENT: ONLINE</span>
-            <span className="w-1 h-1 rounded-full bg-emerald-600"></span>
-            <span>30 FPS</span>
-          </div>
 
           {/* Clock Display */}
           <div className="hidden sm:block text-right font-mono text-xs text-slate-600 px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200">
@@ -101,10 +108,13 @@ export default function Header({
             <span className="sm:hidden">Cài Cam</span>
           </button>
 
-          {/* Notifications Dropdown */}
-          <div className="relative">
+          {/* Notifications Dropdown (Đóng khi click chuột ra ngoài) */}
+          <div 
+            ref={notificationRef}
+            className="relative"
+          >
             <button
-              onClick={() => setShowNotifications(!showNotifications)}
+              onClick={() => setShowNotifications(prev => !prev)}
               className="relative p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-200"
               title="Thông báo cảnh báo"
             >
@@ -172,10 +182,13 @@ export default function Header({
             )}
           </div>
 
-          {/* User Profile Dropdown: Đổi vai trò, Thêm tài khoản khác, Đăng xuất */}
-          <div className="relative pl-1 border-l border-slate-200">
+          {/* User Profile Dropdown: Đổi vai trò, Thêm tài khoản khác, Đăng xuất (Đóng khi click bên ngoài) */}
+          <div 
+            ref={userDropdownRef}
+            className="relative pl-1 border-l border-slate-200"
+          >
             <button
-              onClick={() => setShowUserDropdown(!showUserDropdown)}
+              onClick={() => setShowUserDropdown(prev => !prev)}
               className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-bold text-white text-xs ring-2 ring-emerald-500/20 shadow-xs">
