@@ -142,14 +142,18 @@ export default function DashboardView({
               setNotificationToast(next ? 'Đã bật chế độ giám sát tự động qua các máy trạm!' : 'Đã dừng giám sát tự động.');
               setTimeout(() => setNotificationToast(null), 3500);
             }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] ${
               isPatrolling
-                ? 'bg-amber-500 text-white border-amber-500 shadow-sm animate-pulse'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
+                ? 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-amber-500/25 animate-pulse'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-emerald-600/25'
             }`}
             title="Tự động đảo góc nhìn qua từng máy trạm mỗi 4 giây"
           >
-            {isPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
+            {isPatrolling ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4 fill-current" />
+            )}
             <span>{isPatrolling ? 'Dừng Giám Sát' : 'Giám Sát Tự Động'}</span>
           </button>
         </div>
