@@ -523,9 +523,8 @@ export default function PersonalView({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             
             {/* Cột trái (7 cols): Camera Bàn Làm Việc Cá Nhân Tinh Giản */}
-            <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3.5 flex flex-col justify-between">
-              <div>
-                {/* Header Camera */}
+            <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3.5">
+              {/* Header Camera */}
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
                   <div className="flex items-center gap-2">
                     <Camera className="w-4 h-4 text-emerald-600" />
@@ -756,48 +755,6 @@ export default function PersonalView({
                   </div>
                 </div>
               </div>
-
-              {/* Nút hành động nhanh */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-                <button
-                  onClick={() => setInspectorPersonalCam(personalWorkstation)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-xs transition-colors"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" />
-                  <span>Xem Chi Tiết Máy Phóng To</span>
-                </button>
-
-                <button
-                  onClick={handleTriggerAiScheduleReminder}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-xl text-xs transition-colors border border-emerald-200 cursor-pointer"
-                  title="Thử nghiệm Trợ lý AI nhắc nhở khi đến lịch trình"
-                >
-                  <Brain className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Trợ Lý AI Nhắc Lịch</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (!isWebcamAiActive) {
-                      showToast('Lưu ý: Webcam AI đang tắt. Đang mô phỏng cảnh báo theo luồng màn hình / ứng dụng!');
-                    }
-                    handleSimulateDistraction();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-xl text-xs transition-colors border border-amber-200"
-                >
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Mô Phỏng Cảnh Báo</span>
-                </button>
-
-                <button
-                  onClick={() => setCurrentTab('personal_cameras')}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors"
-                >
-                  <Camera className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Cài Đặt Cam</span>
-                </button>
-              </div>
-            </div>
 
             {/* Cột phải (5 cols): Đồng Hồ Pomodoro & Kế Hoạch Hôm Nay */}
             <div className="lg:col-span-5 space-y-3.5 flex flex-col justify-between">
