@@ -40,7 +40,9 @@ export default function WorkstationInspectorModal({
   member, 
   onClose, 
   onSendBuzzer,
-  isPersonal = false
+  isPersonal = false,
+  isWebcamAiActive = true,
+  onToggleWebcamAi
 }) {
   const isPersonalWorkstation = isPersonal || cam?.id === 'PC-PERSONAL-01' || cam?.id === 'MY-DESK-01';
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -364,96 +366,139 @@ export default function WorkstationInspectorModal({
                 {/* Stream Subtitle Bar */}
                 <div className="px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                    <span className="font-bold text-white">LUỒNG 1: CAM NGOÀI GIÁM SÁT TƯ THẾ AI</span>
+                    <span className={`w-2 h-2 rounded-full ${
+                      isPersonalWorkstation && !isWebcamAiActive
+                        ? 'bg-amber-400'
+                        : 'bg-rose-500 animate-pulse'
+                    }`}></span>
+                    <span className="font-bold text-white">
+                      {isPersonalWorkstation && !isWebcamAiActive
+                        ? 'LUỒNG 1: CAM NGOÀI • ĐÃ TẠM DỪNG'
+                        : 'LUỒNG 1: CAM NGOÀI GIÁM SÁT TƯ THẾ AI'}
+                    </span>
                   </div>
                   <div className="font-mono text-[11px] text-emerald-400">
-                    AI Pose Estimation • 33 Landmarks
+                    {isPersonalWorkstation && !isWebcamAiActive ? (
+                      <span className="text-amber-400">Chế độ riêng tư đang bật</span>
+                    ) : (
+                      'AI Pose Estimation • 33 Landmarks'
+                    )}
                   </div>
                 </div>
 
                 {/* Video / Webcam Display */}
-                <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
-                  <img
-                    src={cam.webcamUrl}
-                    alt={cam.name}
-                    className={`w-full h-full object-cover filter contrast-[1.05] brightness-95 ${snapshotTaken ? 'brightness-150 transition-all duration-300' : ''}`}
-                  />
-
-                  {/* Simulated AI Skeleton Vector Overlay */}
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 640 360">
-                    {/* Head to Neck */}
-                    <circle cx="320" cy="110" r="14" fill="none" stroke={isWarning ? "#f43f5e" : "#10b981"} strokeWidth="2.5" />
-                    {/* Spine line */}
-                    <line x1="320" y1="124" x2="320" y2="210" stroke={isWarning ? "#f43f5e" : "#10b981"} strokeWidth="3" strokeDasharray={isWarning ? "4,4" : "none"} />
-                    {/* Shoulders */}
-                    <line x1="260" y1="150" x2="380" y2="150" stroke={isWarning ? "#f43f5e" : "#10b981"} strokeWidth="3" />
-                    {/* Left Arm */}
-                    <line x1="260" y1="150" x2="230" y2="210" stroke="#0ea5e9" strokeWidth="2.5" />
-                    <line x1="230" y1="210" x2="270" y2="260" stroke="#0ea5e9" strokeWidth="2.5" />
-                    {/* Right Arm */}
-                    <line x1="380" y1="150" x2="410" y2="210" stroke="#0ea5e9" strokeWidth="2.5" />
-                    <line x1="410" y1="210" x2="370" y2="260" stroke="#0ea5e9" strokeWidth="2.5" />
-                    {/* Angle labels */}
-                    <text x="330" y="180" fill={isWarning ? "#f43f5e" : "#10b981"} fontSize="13" fontWeight="bold" fontFamily="monospace">
-                      {postureDetails.spineAngle}°
-                    </text>
-                  </svg>
-
-                  {/* OSD Watermark */}
-                  <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-[11px] font-mono text-white flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                    <span>REC: {liveClock}</span>
+                {isPersonalWorkstation && !isWebcamAiActive ? (
+                  <div className="relative w-full aspect-video bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 flex flex-col items-center justify-center p-6 text-center select-none">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-amber-400 mb-3 shadow-lg shadow-black/50">
+                      <ShieldAlert className="w-7 h-7 text-amber-400" />
+                    </div>
+                    <div className="text-sm font-bold text-white font-mono">
+                      WEBCAM AI ĐANG TẠM DỪNG (HOME OFFICE)
+                    </div>
+                    <p className="text-xs text-slate-400 max-w-sm mt-1.5 leading-relaxed">
+                      Luồng camera ngoài và mô hình AI phân tích tư thế tạm dừng hoạt động nhằm bảo vệ quyền riêng tư cá nhân.
+                    </p>
+                    {onToggleWebcamAi && (
+                      <button
+                        onClick={onToggleWebcamAi}
+                        className="mt-4 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-emerald-900/40 transition-all cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Kích Hoạt Lại Webcam AI</span>
+                      </button>
+                    )}
                   </div>
+                ) : (
+                  <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                    <img
+                      src={cam.webcamUrl}
+                      alt={cam.name}
+                      className={`w-full h-full object-cover filter contrast-[1.05] brightness-95 ${snapshotTaken ? 'brightness-150 transition-all duration-300' : ''}`}
+                    />
 
-                  {isRecording && (
-                    <div className="absolute top-3 right-3 bg-rose-600/90 text-white px-3 py-1 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 animate-pulse">
-                      <span className="w-2 h-2 rounded-full bg-white"></span>
-                      <span>RECORDING {recordSeconds}s</span>
-                    </div>
-                  )}
+                    {/* Simulated AI Skeleton Vector Overlay */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 640 360">
+                      {/* Head to Neck */}
+                      <circle cx="320" cy="110" r="14" fill="none" stroke={isWarning ? "#f43f5e" : "#10b981"} strokeWidth="2.5" />
+                      {/* Spine line */}
+                      <line x1="320" y1="124" x2="320" y2="210" stroke={isWarning ? "#f43f5e" : "#10b981"} strokeWidth="3" strokeDasharray={isWarning ? "4,4" : "none"} />
+                      {/* Shoulders */}
+                      <line x1="260" y1="150" x2="380" y2="150" stroke={isWarning ? "#f43f5e" : "#10b981"} strokeWidth="3" />
+                      {/* Left Arm */}
+                      <line x1="260" y1="150" x2="230" y2="210" stroke="#0ea5e9" strokeWidth="2.5" />
+                      <line x1="230" y1="210" x2="270" y2="260" stroke="#0ea5e9" strokeWidth="2.5" />
+                      {/* Right Arm */}
+                      <line x1="380" y1="150" x2="410" y2="210" stroke="#0ea5e9" strokeWidth="2.5" />
+                      <line x1="410" y1="210" x2="370" y2="260" stroke="#0ea5e9" strokeWidth="2.5" />
+                      {/* Angle labels */}
+                      <text x="330" y="180" fill={isWarning ? "#f43f5e" : "#10b981"} fontSize="13" fontWeight="bold" fontFamily="monospace">
+                        {postureDetails.spineAngle}°
+                      </text>
+                    </svg>
 
-                  {/* Bottom Metrics HUD */}
-                  <div className="absolute bottom-3 left-3 right-3 bg-black/80 backdrop-blur-md p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs text-white">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <span className="text-[10px] text-slate-400 block">Góc Cột Sống</span>
-                        <span className={`font-mono font-bold ${isWarning ? 'text-rose-400' : 'text-emerald-400'}`}>
-                          {postureDetails.spineAngle}° {isWarning ? '(Gù)' : '(Chuẩn)'}
-                        </span>
-                      </div>
-                      <div className="border-l border-white/10 pl-4">
-                        <span className="text-[10px] text-slate-400 block">Nghiêng Cổ</span>
-                        <span className="font-mono font-bold text-amber-300">{postureDetails.neckAngle}°</span>
-                      </div>
-                      <div className="border-l border-white/10 pl-4">
-                        <span className="text-[10px] text-slate-400 block">Cự Ly Mắt - Màn</span>
-                        <span className="font-mono font-bold text-teal-300">{postureDetails.distanceCm} cm</span>
-                      </div>
+                    {/* OSD Watermark */}
+                    <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-[11px] font-mono text-white flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                      <span>REC: {liveClock}</span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block">Trạng Thái AI</span>
-                      <span className="font-bold text-emerald-400">Phát hiện người: 100%</span>
+
+                    {isRecording && (
+                      <div className="absolute top-3 right-3 bg-rose-600/90 text-white px-3 py-1 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 animate-pulse">
+                        <span className="w-2 h-2 rounded-full bg-white"></span>
+                        <span>RECORDING {recordSeconds}s</span>
+                      </div>
+                    )}
+
+                    {/* Bottom Metrics HUD */}
+                    <div className="absolute bottom-3 left-3 right-3 bg-black/80 backdrop-blur-md p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs text-white">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">Góc Cột Sống</span>
+                          <span className={`font-mono font-bold ${isWarning ? 'text-rose-400' : 'text-emerald-400'}`}>
+                            {postureDetails.spineAngle}° {isWarning ? '(Gù)' : '(Chuẩn)'}
+                          </span>
+                        </div>
+                        <div className="border-l border-white/10 pl-4">
+                          <span className="text-[10px] text-slate-400 block">Nghiêng Cổ</span>
+                          <span className="font-mono font-bold text-amber-300">{postureDetails.neckAngle}°</span>
+                        </div>
+                        <div className="border-l border-white/10 pl-4">
+                          <span className="text-[10px] text-slate-400 block">Cự Ly Mắt - Màn</span>
+                          <span className="font-mono font-bold text-teal-300">{postureDetails.distanceCm} cm</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block">Trạng Thái AI</span>
+                        <span className="font-bold text-emerald-400">Phát hiện người: 100%</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Webcam Controls */}
                 <div className="p-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleTakeSnapshot}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition-all"
+                      disabled={isPersonalWorkstation && !isWebcamAiActive}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                        isPersonalWorkstation && !isWebcamAiActive
+                          ? 'bg-slate-800/50 text-slate-500 border-slate-800 cursor-not-allowed'
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 cursor-pointer'
+                      }`}
                     >
                       <Camera className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Chụp Snapshot Bằng Chứng</span>
                     </button>
                     <button
                       onClick={handleToggleRecord}
+                      disabled={isPersonalWorkstation && !isWebcamAiActive}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                        isRecording 
-                          ? 'bg-rose-600 hover:bg-rose-700 text-white' 
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                        isPersonalWorkstation && !isWebcamAiActive
+                          ? 'bg-slate-800/50 text-slate-500 border-slate-800 cursor-not-allowed'
+                          : isRecording 
+                            ? 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer' 
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer'
                       }`}
                     >
                       <Film className="w-3.5 h-3.5" />

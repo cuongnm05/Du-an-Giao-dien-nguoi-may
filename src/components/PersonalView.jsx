@@ -540,24 +540,54 @@ export default function PersonalView({
                       <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Phóng To Chi Tiết Máy</span>
                     </button>
+
+                    {/* Nút Bật/Tắt Webcam nhanh */}
+                    <button
+                      onClick={() => {
+                        const next = !isWebcamAiActive;
+                        setIsWebcamAiActive(next);
+                        showToast(next ? 'Đã bật luồng Webcam AI tự động nhận diện tư thế!' : 'Đã tạm dừng Webcam AI (Bảo vệ quyền riêng tư)');
+                      }}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
+                        isWebcamAiActive
+                          ? 'bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-700 border-slate-200'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                      }`}
+                      title={isWebcamAiActive ? 'Nhấp để tạm ngắt camera và bảo vệ quyền riêng tư' : 'Nhấp để bật lại camera'}
+                    >
+                      {isWebcamAiActive ? (
+                        <>
+                          <VideoOff className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Tắt Cam</span>
+                        </>
+                      ) : (
+                        <>
+                          <Video className="w-3.5 h-3.5 text-white" />
+                          <span>Bật Cam</span>
+                        </>
+                      )}
+                    </button>
+
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
                       isWebcamAiActive
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-slate-100 text-slate-500 border border-slate-200'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
                     }`}>
                       {isWebcamAiActive ? 'LIVE FEED • AI ON' : 'CAMERA • ĐÃ TẠM DỪNG'}
                     </span>
                   </div>
                 </div>
 
-                {/* Viewport Camera Live sắc nét - Bấm để phóng to xem chi tiết */}
+                {/* Viewport Camera Live hoặc Màn hình Chế độ Riêng tư khi Tắt */}
                 <div 
-                  onClick={() => setInspectorPersonalCam(personalWorkstation)}
-                  className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 group shadow-inner cursor-pointer"
-                  title="Nhấp để phóng to toàn màn hình chi tiết máy"
+                  className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 shadow-inner border border-slate-900 group"
                 >
                   {isWebcamAiActive ? (
-                    <>
+                    <div 
+                      onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                      className="w-full h-full relative cursor-pointer"
+                      title="Nhấp để phóng to toàn màn hình chi tiết máy"
+                    >
                       <img
                         src="/webcam/personal_desk_webcam_pov.jpg"
                         alt="Personal Live Camera"
@@ -594,48 +624,134 @@ export default function PersonalView({
                           Khoảng cách: 65cm
                         </span>
                       </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-400 gap-2 p-4 text-center">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400 shadow-inner">
-                        <VideoOff className="w-6 h-6 text-slate-400" />
+
+                      {/* Hover overlay button */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <span className="px-3.5 py-1.5 rounded-xl bg-white/90 text-slate-900 font-bold text-xs shadow-md flex items-center gap-1.5">
+                          <Maximize2 className="w-4 h-4 text-emerald-600" />
+                          <span>Xem Chi Tiết Máy Phóng To</span>
+                        </span>
                       </div>
-                      <div className="text-xs font-mono font-bold text-slate-200">WEBCAM AI ĐANG TẠM DỪNG</div>
-                      <div className="text-[11px] text-slate-400 max-w-xs">
-                        Đã tạm ngắt luồng nhận diện tư thế để bảo vệ quyền riêng tư cá nhân.
+                    </div>
+                  ) : (
+                    /* Giao diện Chế độ Riêng tư khi Camera AI TẮT */
+                    <div className="w-full h-full flex flex-col items-center justify-center relative bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 p-6 text-center select-none">
+                      {/* Subtle pattern */}
+                      <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+                      {/* OSD Privacy Badge */}
+                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700/70 backdrop-blur-md text-slate-300 font-mono text-[10px]">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>CHẾ ĐỘ RIÊNG TƯ: ĐANG BẬT</span>
+                      </div>
+
+                      {/* Nút Xem 3 Luồng Máy góc trên phải */}
+                      <button
+                        onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                        className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-mono text-[10px] transition-all cursor-pointer"
+                        title="Vẫn xem chi tiết các luồng Màn hình & Phím chuột"
+                      >
+                        <Maximize2 className="w-3 h-3 text-slate-400" />
+                        <span>Xem Luồng Máy</span>
+                      </button>
+
+                      {/* Trung tâm: Icon + Thông tin + Nút Bật lại */}
+                      <div className="relative z-10 flex flex-col items-center max-w-sm">
+                        <div className="relative mb-2.5">
+                          <div className="w-13 h-13 rounded-2xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-amber-400 shadow-lg shadow-black/50">
+                            <VideoOff className="w-6 h-6 text-amber-400" />
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-emerald-400 shadow-xs">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                          </div>
+                        </div>
+
+                        <div className="text-xs font-mono font-bold text-white tracking-wide">
+                          WEBCAM AI ĐANG TẠM DỪNG
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-1 max-w-xs leading-relaxed">
+                          Đã ngắt hoàn toàn luồng webcam & mô hình nhận diện tư thế để bảo vệ quyền riêng tư cá nhân.
+                        </p>
+
+                        {/* Nút Bật lại Camera AI ngay lập tức */}
+                        <div className="mt-3 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setIsWebcamAiActive(true);
+                              showToast('Đã kích hoạt lại Webcam AI nhận diện tư thế!');
+                            }}
+                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-900/40 transition-all cursor-pointer"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Bật Lại Camera AI</span>
+                          </button>
+
+                          <button
+                            onClick={() => setCurrentTab('personal_cameras')}
+                            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-700"
+                          >
+                            <Sliders className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Cài Đặt</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Footer note trong video screen */}
+                      <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Màn hình & Phím chuột: Vẫn hoạt động độc lập</span>
+                        <span className="text-amber-500/80">● Pose Sensor Inactive</span>
                       </div>
                     </div>
                   )}
-
-                  {/* Hover overlay button */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="px-3.5 py-1.5 rounded-xl bg-white/90 text-slate-900 font-bold text-xs shadow-md flex items-center gap-1.5">
-                      <Maximize2 className="w-4 h-4 text-emerald-600" />
-                      <span>Xem Chi Tiết Máy Phóng To</span>
-                    </span>
-                  </div>
                 </div>
 
                 {/* Tóm tắt 3 Luồng Giám Sát Cá Nhân */}
                 <div className="grid grid-cols-3 gap-2 text-center text-xs pt-3">
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="text-[10px] text-slate-400 font-semibold">1. Cam Ngoài</div>
-                    <div className="font-bold text-emerald-700 text-xs mt-0.5">
-                      Ngồi Chuẩn (98°)
+                  {/* 1. Cam Ngoài */}
+                  <div className={`p-2 rounded-xl border transition-all ${
+                    isWebcamAiActive 
+                      ? 'bg-emerald-50/50 border-emerald-100' 
+                      : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-semibold">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isWebcamAiActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                      <span>1. Cam Ngoài (AI)</span>
+                    </div>
+                    <div className={`font-bold text-xs mt-0.5 ${
+                      isWebcamAiActive ? 'text-emerald-700' : 'text-slate-500'
+                    }`}>
+                      {isWebcamAiActive ? 'Ngồi Chuẩn (98°)' : 'Đã Tạm Dừng (Tắt)'}
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">
+                      {isWebcamAiActive ? 'Lưng 98° • Cổ 14°' : 'Bảo vệ quyền riêng tư'}
                     </div>
                   </div>
 
+                  {/* 2. Cam Màn Hình */}
                   <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="text-[10px] text-slate-400 font-semibold">2. Cam Màn Hình</div>
+                    <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                      <span>2. Cam Màn Hình</span>
+                    </div>
                     <div className="font-bold text-blue-700 text-xs mt-0.5 font-mono truncate">
                       VS Code (Frontend)
                     </div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">
+                      Tiến trình đang mở
+                    </div>
                   </div>
 
+                  {/* 3. Phím & Chuột */}
                   <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="text-[10px] text-slate-400 font-semibold">3. Phím & Chuột</div>
+                    <div className="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                      <span>3. Phím & Chuột</span>
+                    </div>
                     <div className="font-bold text-purple-700 text-xs mt-0.5 font-mono">
                       68 WPM • Tích cực
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-0.5">
+                      Tương tác thao tác tốt
                     </div>
                   </div>
                 </div>
@@ -661,7 +777,12 @@ export default function PersonalView({
                 </button>
 
                 <button
-                  onClick={handleSimulateDistraction}
+                  onClick={() => {
+                    if (!isWebcamAiActive) {
+                      showToast('Lưu ý: Webcam AI đang tắt. Đang mô phỏng cảnh báo theo luồng màn hình / ứng dụng!');
+                    }
+                    handleSimulateDistraction();
+                  }}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-xl text-xs transition-colors border border-amber-200"
                 >
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
@@ -2455,14 +2576,20 @@ export default function PersonalView({
             webcamUrl: '/webcam/personal_desk_webcam_pov.jpg',
             ip: '192.168.1.55',
             activeProcess: 'code.exe - VS Code Frontend Core',
-            currentPosture: 'good',
+            currentPosture: isWebcamAiActive ? 'good' : 'paused',
             inputTelemetry: personalWorkstation.inputTelemetry
           }}
           isPersonal={true}
+          isWebcamAiActive={isWebcamAiActive}
+          onToggleWebcamAi={() => {
+            const next = !isWebcamAiActive;
+            setIsWebcamAiActive(next);
+            showToast(next ? 'Đã bật lại Webcam AI nhận diện tư thế!' : 'Đã tạm dừng Webcam AI (Bảo vệ riêng tư)');
+          }}
           member={{
             name: 'Nguyễn Văn Cường',
             role: 'Kỹ sư phần mềm (Cá nhân)',
-            currentPosture: 'good',
+            currentPosture: isWebcamAiActive ? 'good' : 'paused',
             ergonomicsScore: 94,
             rank: 1
           }}
