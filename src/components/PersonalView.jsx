@@ -520,119 +520,88 @@ export default function PersonalView({
           </div>
 
           {/* Bố Cục 2 Cột: Camera Bàn Làm Việc Live & Nhịp Độ Pomodoro */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
             
             {/* Cột trái (7 cols): Camera Bàn Làm Việc Cá Nhân Tinh Giản */}
             <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3.5">
               {/* Header Camera */}
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
-                  <div className="flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-emerald-600" />
-                    <span className="font-bold text-slate-900 text-sm">Camera Bàn Làm Việc AI Cá Nhân</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setInspectorPersonalCam(personalWorkstation)}
-                      className="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                      title="Mở toàn màn hình xem chi tiết 3 luồng (Webcam, Màn hình, Phím & chuột)"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Phóng To Chi Tiết Máy</span>
-                    </button>
-
-                    {/* Nút Bật/Tắt Webcam nhanh */}
-                    <button
-                      onClick={() => {
-                        const next = !isWebcamAiActive;
-                        setIsWebcamAiActive(next);
-                        showToast(next ? 'Đã bật luồng Webcam AI tự động nhận diện tư thế!' : 'Đã tạm dừng Webcam AI (Bảo vệ quyền riêng tư)');
-                      }}
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
-                        isWebcamAiActive
-                          ? 'bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-700 border-slate-200'
-                          : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-xs'
-                      }`}
-                      title={isWebcamAiActive ? 'Nhấp để tạm ngắt camera và bảo vệ quyền riêng tư' : 'Nhấp để bật lại camera'}
-                    >
-                      {isWebcamAiActive ? (
-                        <>
-                          <VideoOff className="w-3.5 h-3.5 text-slate-500" />
-                          <span>Tắt Cam</span>
-                        </>
-                      ) : (
-                        <>
-                          <Video className="w-3.5 h-3.5 text-white" />
-                          <span>Bật Cam</span>
-                        </>
-                      )}
-                    </button>
-
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
-                      isWebcamAiActive
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-amber-50 text-amber-700 border border-amber-200'
-                    }`}>
-                      {isWebcamAiActive ? 'LIVE FEED • AI ON' : 'CAMERA • ĐÃ TẠM DỪNG'}
-                    </span>
-                  </div>
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 text-xs">
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-emerald-600" />
+                  <span className="font-bold text-slate-900 text-sm">Camera Bàn Làm Việc AI Cá Nhân</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer hover:scale-102 active:scale-98"
+                    title="Mở toàn màn hình xem chi tiết 3 luồng (Webcam, Màn hình, Phím & chuột)"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Phóng To Chi Tiết</span>
+                  </button>
 
-                {/* Viewport Camera Live hoặc Màn hình Chế độ Riêng tư khi Tắt */}
-                <div 
-                  className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 shadow-inner border border-slate-900 group"
-                >
-                  {isWebcamAiActive ? (
-                    <div 
-                      onClick={() => setInspectorPersonalCam(personalWorkstation)}
-                      className="w-full h-full relative cursor-pointer"
-                      title="Nhấp để phóng to toàn màn hình chi tiết máy"
-                    >
-                      <img
-                        src="/webcam/personal_desk_webcam_pov.jpg"
-                        alt="Personal Live Camera"
-                        className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95] group-hover:scale-105 transition-transform duration-300"
-                      />
+                  <button
+                    onClick={() => {
+                      const next = !isWebcamAiActive;
+                      setIsWebcamAiActive(next);
+                      showToast(next ? 'Đã bật luồng Webcam AI tự động nhận diện tư thế!' : 'Đã tạm dừng Webcam AI (Bảo vệ quyền riêng tư)');
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono font-bold transition-all border cursor-pointer ${
+                      isWebcamAiActive
+                        ? 'bg-emerald-50 hover:bg-rose-50 text-emerald-700 hover:text-rose-700 border-emerald-200 hover:border-rose-200 shadow-2xs'
+                        : 'bg-amber-50 hover:bg-emerald-50 text-amber-700 hover:text-emerald-700 border-amber-200 hover:border-emerald-200 shadow-2xs'
+                    }`}
+                    title={isWebcamAiActive ? 'Nhấp để tạm ngắt camera và bảo vệ quyền riêng tư' : 'Nhấp để bật lại camera'}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${isWebcamAiActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                    <span>{isWebcamAiActive ? 'LIVE FEED • AI ON' : 'CAMERA • ĐÃ TẠM DỪNG'}</span>
+                  </button>
+                </div>
+              </div>
 
-                      {/* OSD Header */}
-                      <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-white font-mono text-[10px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                        <span>1080P @ 30FPS</span>
-                        <span>•</span>
-                        <span>Home Office</span>
-                      </div>
+              {/* Viewport Camera Live hoặc Màn hình Chế độ Riêng tư khi Tắt */}
+              <div 
+                className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video mt-3 shadow-inner border border-slate-900 group"
+              >
+                {isWebcamAiActive ? (
+                  <div 
+                    onClick={() => setInspectorPersonalCam(personalWorkstation)}
+                    className="w-full h-full relative cursor-pointer"
+                    title="Nhấp để phóng to toàn màn hình chi tiết máy"
+                  >
+                    <img
+                      src="/webcam/personal_desk_webcam_pov.jpg"
+                      alt="Personal Live Camera"
+                      className="w-full h-full object-cover filter contrast-[1.05] brightness-[0.95] group-hover:scale-105 transition-transform duration-300"
+                    />
 
-                      {/* Nút Phóng To góc trên phải */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setInspectorPersonalCam(personalWorkstation);
-                        }}
-                        className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/75 hover:bg-black/90 backdrop-blur-md text-white font-mono text-[10px] font-bold transition-all border border-white/20 hover:border-emerald-400 group-hover:scale-105 cursor-pointer shadow-sm"
-                        title="Phóng to chi tiết máy"
-                      >
-                        <Maximize2 className="w-3 h-3 text-emerald-400" />
-                        <span>Phóng to</span>
-                      </button>
-
-                      {/* OSD Posture Status */}
-                      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[11px] font-mono">
-                        <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-emerald-300 font-bold">
-                          ✓ Tư thế chuẩn (Lưng thẳng 98° • Cổ 14°)
-                        </span>
-                        <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-slate-300">
-                          Khoảng cách: 65cm
-                        </span>
-                      </div>
-
-                      {/* Hover overlay button */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                        <span className="px-3.5 py-1.5 rounded-xl bg-white/90 text-slate-900 font-bold text-xs shadow-md flex items-center gap-1.5">
-                          <Maximize2 className="w-4 h-4 text-emerald-600" />
-                          <span>Xem Chi Tiết Máy Phóng To</span>
-                        </span>
-                      </div>
+                    {/* OSD Header */}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-white font-mono text-[10px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                      <span>1080P @ 30FPS</span>
+                      <span>•</span>
+                      <span>Home Office</span>
                     </div>
-                  ) : (
+
+                    {/* OSD Posture Status */}
+                    <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[11px] font-mono">
+                      <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-emerald-300 font-bold">
+                        ✓ Tư thế chuẩn (Lưng thẳng 98° • Cổ 14°)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-slate-300">
+                        Khoảng cách: 65cm
+                      </span>
+                    </div>
+
+                    {/* Hover overlay button */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="px-3.5 py-1.5 rounded-xl bg-white/90 text-slate-900 font-bold text-xs shadow-md flex items-center gap-1.5">
+                        <Maximize2 className="w-4 h-4 text-emerald-600" />
+                        <span>Xem Chi Tiết Máy Phóng To</span>
+                      </span>
+                    </div>
+                  </div>
+                ) : (
                     /* Giao diện Chế độ Riêng tư khi Camera AI TẮT */
                     <div className="w-full h-full flex flex-col items-center justify-center relative bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 p-6 text-center select-none">
                       {/* Subtle pattern */}
