@@ -336,7 +336,7 @@ export default function PostureModal({ member, onClose, onSendBuzzer }) {
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    <span>Gửi Nhắc Nhở Trực Tiếp Đến Màn Hình Bàn</span>
+                    <span>Gửi Nhắc Nhở</span>
                   </>
                 )}
               </button>
