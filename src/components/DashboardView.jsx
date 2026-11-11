@@ -6,7 +6,6 @@ import {
   Clock, 
   Keyboard, 
   MousePointer, 
-  LayoutGrid, 
   Camera, 
   ChevronRight, 
   ArrowUpRight, 
@@ -16,7 +15,6 @@ import {
   Flame, 
   TrendingUp, 
   UserCheck, 
-  FileText,
   Sliders,
   Laptop,
   Trophy,
@@ -135,9 +133,8 @@ export default function DashboardView({
           </p>
         </div>
 
-        {/* Nút xem toàn bộ Camera, Giám Sát & Báo cáo */}
+        {/* Nút Giám Sát Tự Động */}
         <div className="flex items-center gap-2">
-          {/* Nút Giám Sát Tự Động */}
           <button
             onClick={() => {
               const next = !isPatrolling;
@@ -145,31 +142,15 @@ export default function DashboardView({
               setNotificationToast(next ? 'Đã bật chế độ giám sát tự động qua các máy trạm!' : 'Đã dừng giám sát tự động.');
               setTimeout(() => setNotificationToast(null), 3500);
             }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
               isPatrolling
                 ? 'bg-amber-500 text-white border-amber-500 shadow-sm animate-pulse'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
             }`}
             title="Tự động đảo góc nhìn qua từng máy trạm mỗi 4 giây"
           >
             {isPatrolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
             <span>{isPatrolling ? 'Dừng Giám Sát' : 'Giám Sát Tự Động'}</span>
-          </button>
-
-          <button
-            onClick={() => onNavigateTab('multicam')}
-            className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <LayoutGrid className="w-4 h-4" />
-            <span>Mở Tường {cameras.length} Camera (Live)</span>
-          </button>
-
-          <button
-            onClick={() => onNavigateTab('reports')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition-all"
-          >
-            <FileText className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden md:inline">Xem Báo Cáo</span>
           </button>
         </div>
       </div>
